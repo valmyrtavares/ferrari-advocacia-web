@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AdminLogin from './AdminLogin';
 import {
   getStoredLawyers,
   saveStoredLawyers,
@@ -6,17 +7,33 @@ import {
   saveStoredAreas,
   getStoredArticles,
   saveStoredArticles,
+  getStoredContact,
+  saveStoredContact,
   resetCmsDefaults,
   getEmbedVideoUrl
 } from '../data/cmsData';
 
 export default function Admin({ onNavigateToSite }) {
-  const [activeTab, setActiveTab] = useState('escritorio'); // 'escritorio' | 'artigos' | 'dashboard'
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('ef_admin_logged_in') === 'true';
+  });
+
+  const [activeTab, setActiveTab] = useState('escritorio'); // 'escritorio' | 'artigos' | 'contato' | 'dashboard'
   const [subTab, setSubTab] = useState('equipe'); // 'equipe' | 'areas'
   
   const [lawyers, setLawyers] = useState([]);
   const [areas, setAreas] = useState([]);
   const [articles, setArticles] = useState([]);
+  const [contact, setContact] = useState({
+    title: '',
+    companyName: '',
+    subtitle: '',
+    address: '',
+    phone: '',
+    whatsappNumber: '',
+    email: '',
+    hours: ''
+  });
   const [searchTerm, setSearchTerm] = useState('');
 
   // Modals / Editor State for Lawyer
@@ -80,6 +97,7 @@ export default function Admin({ onNavigateToSite }) {
     setLawyers(getStoredLawyers());
     setAreas(getStoredAreas());
     setArticles(getStoredArticles());
+    setContact(getStoredContact());
   };
 
   useEffect(() => {
@@ -389,6 +407,20 @@ export default function Admin({ onNavigateToSite }) {
     });
   };
 
+  // --- CONTACT SAVE ---
+  const handleSaveContact = (e) => {
+    e.preventDefault();
+    saveStoredContact(contact);
+    showToast('Informações de contato e atendimento atualizadas com sucesso!');
+  };
+
+  const handleContactChange = (field, value) => {
+    setContact(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   // Execute Delete
   const handleExecuteDelete = () => {
     if (deleteConfirm.type === 'lawyer') {
@@ -411,7 +443,7 @@ export default function Admin({ onNavigateToSite }) {
   };
 
   const handleResetDefaults = () => {
-    if (window.confirm('Tem certeza que deseja restaurar o conteúdo original padrão do site (Equipe, Áreas e Artigos com Vídeo)? Todas as alterações manuais serão resetadas.')) {
+    if (window.confirm('Tem certeza que deseja restaurar o conteúdo original padrão do site (Equipe, Áreas, Artigos e Contato)? Todas as alterações manuais serão resetadas.')) {
       resetCmsDefaults();
       loadData();
       showToast('Conteúdo do site restaurado para o padrão com sucesso!');
@@ -438,6 +470,26 @@ export default function Admin({ onNavigateToSite }) {
 
   const previewVideoEmbed = getEmbedVideoUrl(editingArticle.videoUrl);
 
+  const handleLoginSuccess = () => {
+    sessionStorage.setItem('ef_admin_logged_in', 'true');
+    setIsAuthenticated(true);
+    showToast('Login realizado com sucesso! Bem-vindo ao Painel CMS.');
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('ef_admin_logged_in');
+    setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <AdminLogin 
+        onLoginSuccess={handleLoginSuccess}
+        onNavigateToSite={onNavigateToSite}
+      />
+    );
+  }
+
   return (
     <div className="admin-root">
       {/* Toast */}
@@ -451,9 +503,12 @@ export default function Admin({ onNavigateToSite }) {
       {/* Top Bar */}
       <header className="admin-header">
         <div className="admin-brand">
-          <div className="brand-logo-monogram admin-monogram">EF</div>
+          <img 
+            src="/image/logo ferrari-escritorio-28-11-25.jpg" 
+            alt="Eduardo Ferrari Advocacia" 
+            className="admin-header-logo-img" 
+          />
           <div className="admin-brand-info">
-            <span className="admin-brand-title">EDUARDO FERRARI ADVOCACIA</span>
             <span className="admin-brand-badge">PAINEL CMS ADMINISTRATIVO</span>
           </div>
         </div>
@@ -472,6 +527,14 @@ export default function Admin({ onNavigateToSite }) {
             onClick={onNavigateToSite}
           >
             🌐 Ver Site Online
+          </button>
+
+          <button 
+            className="admin-btn-logout"
+            onClick={handleLogout}
+            title="Encerrar Sessão do Painel"
+          >
+            🚪 Sair
           </button>
         </div>
       </header>
@@ -499,6 +562,14 @@ export default function Admin({ onNavigateToSite }) {
           </button>
 
           <button 
+            className={`admin-nav-btn ${activeTab === 'contato' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('contato'); setSearchTerm(''); }}
+          >
+            <span className="nav-icon">📞</span>
+            <span>Contato & Atendimento</span>
+          </button>
+
+          <button 
             className={`admin-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
             onClick={() => { setActiveTab('dashboard'); setSearchTerm(''); }}
           >
@@ -511,7 +582,7 @@ export default function Admin({ onNavigateToSite }) {
               <span className="status-dot"></span>
               <span>Armazenamento: LocalStorage Ativo</span>
             </div>
-            <div className="admin-version">CMS v1.3 • Eduardo Ferrari</div>
+            <div className="admin-version">CMS v1.4 • Eduardo Ferrari</div>
           </div>
         </aside>
 
@@ -707,7 +778,7 @@ export default function Admin({ onNavigateToSite }) {
             </div>
           )}
 
-          {/* TAB 2: NOTÍCIAS & ARTIGOS (NEW TAB!) */}
+          {/* TAB 2: NOTÍCIAS & ARTIGOS */}
           {activeTab === 'artigos' && (
             <div className="admin-section-container animate-fade">
               <div className="admin-subtabs-bar">
@@ -816,7 +887,175 @@ export default function Admin({ onNavigateToSite }) {
             </div>
           )}
 
-          {/* TAB 3: DASHBOARD */}
+          {/* TAB 3: CONTATO & ATENDIMENTO (NEW TAB!) */}
+          {activeTab === 'contato' && (
+            <div className="admin-section-container animate-fade">
+              <div className="admin-subtabs-bar">
+                <div className="admin-section-header-title">
+                  <h2 className="admin-sub-heading">Configurações de Contato & Atendimento</h2>
+                  <span className="admin-sub-count">Informações de contato e WhatsApp do escritório</span>
+                </div>
+              </div>
+
+              <div className="admin-contact-editor-layout">
+                {/* Contact Form Form */}
+                <form onSubmit={handleSaveContact} className="admin-contact-form-box">
+                  <h3 className="editor-card-title">📝 Dados da Empresa & Canais de Atendimento</h3>
+                  
+                  <div className="form-row">
+                    <div className="form-group flex-1">
+                      <label className="admin-form-label" htmlFor="contact-title">Título da Seção *</label>
+                      <input 
+                        id="contact-title"
+                        type="text" 
+                        className="admin-input" 
+                        value={contact.title}
+                        onChange={(e) => handleContactChange('title', e.target.value)}
+                        placeholder="Ex: Fale Conosco"
+                        required
+                      />
+                    </div>
+                    <div className="form-group flex-1">
+                      <label className="admin-form-label" htmlFor="contact-company">Nome / Razão Social *</label>
+                      <input 
+                        id="contact-company"
+                        type="text" 
+                        className="admin-input" 
+                        value={contact.companyName}
+                        onChange={(e) => handleContactChange('companyName', e.target.value)}
+                        placeholder="Ex: EDUARDO FERRARI ADVOGADOS ASSOCIADOS"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="admin-form-label" htmlFor="contact-subtitle">Subtítulo / Mensagem de Acolhimento</label>
+                    <input 
+                      id="contact-subtitle"
+                      type="text" 
+                      className="admin-input" 
+                      value={contact.subtitle}
+                      onChange={(e) => handleContactChange('subtitle', e.target.value)}
+                      placeholder="Ex: Agende uma consulta presencial ou remota com nossa equipe de especialistas jurídicos."
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="admin-form-label" htmlFor="contact-address">📍 Endereço Completo</label>
+                    <input 
+                      id="contact-address"
+                      type="text" 
+                      className="admin-input" 
+                      value={contact.address}
+                      onChange={(e) => handleContactChange('address', e.target.value)}
+                      placeholder="Ex: Al. Tangará, 80, Sala 1, The Point Office, Cotia-SP, CEP 06711-020"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group flex-1">
+                      <label className="admin-form-label" htmlFor="contact-phone">📞 Telefone Comercial (Exibição)</label>
+                      <input 
+                        id="contact-phone"
+                        type="text" 
+                        className="admin-input" 
+                        value={contact.phone}
+                        onChange={(e) => handleContactChange('phone', e.target.value)}
+                        placeholder="Ex: +55 (11) 98899-4871"
+                        required
+                      />
+                    </div>
+                    <div className="form-group flex-1">
+                      <label className="admin-form-label" htmlFor="contact-whatsapp">
+                        🟢 WhatsApp (Apenas Números com DDD)
+                      </label>
+                      <input 
+                        id="contact-whatsapp"
+                        type="text" 
+                        className="admin-input" 
+                        value={contact.whatsappNumber}
+                        onChange={(e) => handleContactChange('whatsappNumber', e.target.value.replace(/\D/g, ''))}
+                        placeholder="Ex: 5511988994871"
+                        required
+                      />
+                      <span className="input-helper-text">Número que receberá as mensagens do formulário do site.</span>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group flex-1">
+                      <label className="admin-form-label" htmlFor="contact-email">✉️ E-mail de Contato</label>
+                      <input 
+                        id="contact-email"
+                        type="email" 
+                        className="admin-input" 
+                        value={contact.email}
+                        onChange={(e) => handleContactChange('email', e.target.value)}
+                        placeholder="Ex: contato@zsaa.com.br"
+                        required
+                      />
+                    </div>
+                    <div className="form-group flex-1">
+                      <label className="admin-form-label" htmlFor="contact-hours">🕒 Horário de Atendimento</label>
+                      <input 
+                        id="contact-hours"
+                        type="text" 
+                        className="admin-input" 
+                        value={contact.hours}
+                        onChange={(e) => handleContactChange('hours', e.target.value)}
+                        placeholder="Ex: Segunda a Sexta - 09:00 às 18:00"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="contact-form-actions">
+                    <button type="submit" className="admin-btn-accent">
+                      💾 Salvar Informações de Contato
+                    </button>
+                  </div>
+                </form>
+
+                {/* Real-time Preview Box */}
+                <div className="admin-contact-preview-box">
+                  <h3 className="preview-box-title">👁️ Visualização em Tempo Real no Site</h3>
+                  <div className="site-preview-card">
+                    <h4 className="preview-heading">{contact.title || 'Fale Conosco'}</h4>
+                    <div className="preview-divider"></div>
+                    <h5 className="preview-company">{contact.companyName || 'EDUARDO FERRARI ADVOGADOS'}</h5>
+                    <p className="preview-subtitle">{contact.subtitle}</p>
+
+                    <div className="preview-details-list">
+                      <div className="preview-detail-item">
+                        <span className="p-icon">📍</span>
+                        <span>{contact.address || 'Endereço não informado'}</span>
+                      </div>
+                      <div className="preview-detail-item">
+                        <span className="p-icon">📞</span>
+                        <span>{contact.phone || 'Telefone não informado'}</span>
+                      </div>
+                      <div className="preview-detail-item">
+                        <span className="p-icon">✉️</span>
+                        <span>{contact.email || 'E-mail não informado'}</span>
+                      </div>
+                      <div className="preview-detail-item">
+                        <span className="p-icon">🕒</span>
+                        <span>{contact.hours || 'Horário não informado'}</span>
+                      </div>
+                      <div className="preview-detail-item whatsapp-preview">
+                        <span className="p-icon">🟢</span>
+                        <span>Envio WhatsApp: <strong>{contact.whatsappNumber || 'Não configurado'}</strong></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: DASHBOARD */}
           {activeTab === 'dashboard' && (
             <div className="admin-dashboard-view animate-fade">
               <h2 className="admin-view-title">Resumo do Sistema CMS</h2>
@@ -843,7 +1082,7 @@ export default function Admin({ onNavigateToSite }) {
                 <ul>
                   <li><strong>O Escritório:</strong> Gerencie os membros da equipe jurídica (com fotos, qualificações e biografias) e as áreas de atuação prática.</li>
                   <li><strong>Notícias & Artigos:</strong> Publique novos artigos com data, categoria, autor e URL de vídeo (YouTube, Vimeo) para que os clientes assistam e leiam o conteúdo integral.</li>
-                  <li><strong>Leitura Integral no Site:</strong> Ao clicar em <em>"Ler Artigo Integral →"</em> na área do cliente, o leitor abre uma tela dedicada com o artigo completo e o reprodutor de vídeo.</li>
+                  <li><strong>Contato & Atendimento:</strong> Atualize endereço, e-mail, telefone e o número de WhatsApp que recebe os formulários de contato do site.</li>
                   <li><strong>Restaurar Padrões:</strong> Use o botão no topo para restaurar as demonstrações originais sempre que necessário.</li>
                 </ul>
               </div>

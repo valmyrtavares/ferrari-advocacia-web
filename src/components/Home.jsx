@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { getStoredLawyers, getStoredAreas, getStoredArticles, getEmbedVideoUrl } from '../data/cmsData';
+import ClientArea from './ClientArea';
+import {
+  getStoredLawyers,
+  getStoredAreas,
+  getStoredArticles,
+  getStoredContact,
+  getEmbedVideoUrl
+} from '../data/cmsData';
 
 export default function Home({ onNavigateToAdmin }) {
-  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'escritorio' | 'noticias' | 'contato'
+  // Navigation & URL Routing States
+  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'escritorio' | 'noticias' | 'cliente' | 'contato'
   const [officeTab, setOfficeTab] = useState('areas'); // 'equipe' | 'areas'
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeServiceId, setActiveServiceId] = useState('quem-somos');
@@ -10,16 +18,107 @@ export default function Home({ onNavigateToAdmin }) {
   const [selectedArticleId, setSelectedArticleId] = useState(null); // Article ID for full-reading mode
   const [lang, setLang] = useState('pt'); // 'pt' | 'en'
 
+  // Articles Carousel State
+  const [articleSlideIndex, setArticleSlideIndex] = useState(0);
+
   // Dynamic CMS Data from LocalStorage
   const [cmsLawyers, setCmsLawyers] = useState(getStoredLawyers);
   const [cmsAreas, setCmsAreas] = useState(getStoredAreas);
   const [cmsArticles, setCmsArticles] = useState(getStoredArticles);
+  const [cmsContact, setCmsContact] = useState(getStoredContact);
+
+  // Parse URL Hash for direct link sharing
+  const applyRouteFromHash = () => {
+    const hash = window.location.hash.replace(/^#\/?/, '').trim();
+    if (!hash || hash === 'home') {
+      setCurrentPage('home');
+      setSelectedArticleId(null);
+      return;
+    }
+
+    const parts = hash.split('/');
+    const mainSection = parts[0];
+
+    if (mainSection === 'admin') {
+      onNavigateToAdmin();
+      return;
+    }
+
+    if (mainSection === 'escritorio') {
+      setCurrentPage('escritorio');
+      setSelectedArticleId(null);
+      const sub = parts[1];
+      const targetId = parts[2];
+
+      if (sub === 'equipe') {
+        setOfficeTab('equipe');
+        if (targetId) setActiveLawyerId(targetId);
+      } else {
+        setOfficeTab('areas');
+        if (targetId) setActiveServiceId(targetId);
+      }
+    } else if (mainSection === 'noticias' || mainSection === 'artigos') {
+      setCurrentPage('noticias');
+      const artId = parts[1];
+      if (artId) {
+        setSelectedArticleId(artId);
+      } else {
+        setSelectedArticleId(null);
+      }
+    } else if (mainSection === 'cliente' || mainSection === 'area-cliente') {
+      setCurrentPage('cliente');
+      setSelectedArticleId(null);
+    } else if (mainSection === 'contato') {
+      setCurrentPage('contato');
+      setSelectedArticleId(null);
+    }
+  };
+
+  // Synchronize on mount and URL change
+  useEffect(() => {
+    applyRouteFromHash();
+    window.addEventListener('hashchange', applyRouteFromHash);
+    window.addEventListener('popstate', applyRouteFromHash);
+    return () => {
+      window.removeEventListener('hashchange', applyRouteFromHash);
+      window.removeEventListener('popstate', applyRouteFromHash);
+    };
+  }, []);
+
+  // Update URL Hash helper
+  const navigateToHash = (page, subTab = null, itemId = null) => {
+    let newHash = `#/${page}`;
+    if (page === 'escritorio') {
+      const tab = subTab || officeTab;
+      newHash += `/${tab}`;
+      if (itemId) {
+        newHash += `/${itemId}`;
+      } else if (tab === 'equipe' && activeLawyerId) {
+        newHash += `/${activeLawyerId}`;
+      } else if (tab === 'areas' && activeServiceId) {
+        newHash += `/${activeServiceId}`;
+      }
+    } else if (page === 'noticias' && itemId) {
+      newHash += `/${itemId}`;
+    }
+
+    window.location.hash = newHash;
+    setCurrentPage(page);
+    if (subTab) setOfficeTab(subTab);
+    if (page === 'noticias') {
+      setSelectedArticleId(itemId);
+    } else {
+      setSelectedArticleId(null);
+    }
+    setMenuOpen(false);
+  };
 
   useEffect(() => {
     const handleCmsUpdate = () => {
       setCmsLawyers(getStoredLawyers());
       setCmsAreas(getStoredAreas());
       setCmsArticles(getStoredArticles());
+      setCmsContact(getStoredContact());
     };
 
     window.addEventListener('cms_data_updated', handleCmsUpdate);
@@ -36,6 +135,7 @@ export default function Home({ onNavigateToAdmin }) {
         home: 'Home',
         escritorio: 'O Escritório',
         noticias: 'Notícias & Artigos',
+        areaCliente: 'Área do Cliente',
         contato: 'Contato'
       },
       hero: {
@@ -58,12 +158,13 @@ export default function Home({ onNavigateToAdmin }) {
         articles: cmsArticles
       },
       contato: {
-        heading: 'Fale Conosco',
-        subtitle: 'Agende uma consulta presencial ou remota com nossa equipe de especialistas jurídicos.',
-        address: 'Al. Tangará, 80, Sala 1, The Point Office, Cotia-SP, CEP 06711-020',
-        phone: '+55 (11) 98899-4871',
-        email: 'contato@zsaa.com.br',
-        hours: 'Segunda a Sexta - 09:00 às 18:00',
+        heading: cmsContact.title || 'Fale Conosco',
+        companyName: cmsContact.companyName || 'EDUARDO FERRARI ADVOGADOS ASSOCIADOS',
+        subtitle: cmsContact.subtitle || 'Agende uma consulta presencial ou remota com nossa equipe de especialistas jurídicos.',
+        address: cmsContact.address || 'Al. Tangará, 80, Sala 1, The Point Office, Cotia-SP, CEP 06711-020',
+        phone: cmsContact.phone || '+55 (11) 98899-4871',
+        email: cmsContact.email || 'contato@zsaa.com.br',
+        hours: cmsContact.hours || 'Segunda a Sexta - 09:00 às 18:00',
         labels: {
           name: 'Nome Completo',
           email: 'E-mail Corporativo',
@@ -81,6 +182,7 @@ export default function Home({ onNavigateToAdmin }) {
         home: 'Home',
         escritorio: 'The Firm',
         noticias: 'News & Articles',
+        areaCliente: 'Client Portal',
         contato: 'Contact'
       },
       hero: {
@@ -103,12 +205,13 @@ export default function Home({ onNavigateToAdmin }) {
         articles: cmsArticles
       },
       contato: {
-        heading: 'Contact Us',
-        subtitle: 'Schedule an in-person or remote consultation with our team of legal experts.',
-        address: 'Al. Tangará, 80, Suite 1, The Point Office, Cotia-SP, Brazil, CEP 06711-020',
-        phone: '+55 (11) 98899-4871',
-        email: 'contato@zsaa.com.br',
-        hours: 'Monday to Friday - 09:00 AM to 06:00 PM',
+        heading: cmsContact.title || 'Contact Us',
+        companyName: cmsContact.companyName || 'EDUARDO FERRARI ATTORNEYS AT LAW',
+        subtitle: cmsContact.subtitle || 'Schedule an in-person or remote consultation with our team of legal experts.',
+        address: cmsContact.address || 'Al. Tangará, 80, Suite 1, The Point Office, Cotia-SP, Brazil, CEP 06711-020',
+        phone: cmsContact.phone || '+55 (11) 98899-4871',
+        email: cmsContact.email || 'contato@zsaa.com.br',
+        hours: cmsContact.hours || 'Monday to Friday - 09:00 AM to 06:00 PM',
         labels: {
           name: 'Full Name',
           email: 'Corporate E-mail',
@@ -141,7 +244,7 @@ export default function Home({ onNavigateToAdmin }) {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    const phoneNumber = "5511988994871";
+    const phoneNumber = (cmsContact && cmsContact.whatsappNumber) ? cmsContact.whatsappNumber.replace(/\D/g, '') : "5511988994871";
     const text = `*${lang === 'pt' ? 'Novo Contato via Site Eduardo Ferrari Advogados' : 'New Contact via Eduardo Ferrari Law Website'}*\n\n` +
                  `👤 *${t.contato.labels.name}:* ${formData.name}\n` +
                  `✉️ *${t.contato.labels.email}:* ${formData.email}\n` +
@@ -153,23 +256,37 @@ export default function Home({ onNavigateToAdmin }) {
     window.open(whatsappUrl, '_blank');
   };
 
-  const navigateTo = (page, subTab = null) => {
-    setCurrentPage(page);
-    if (subTab) {
-      setOfficeTab(subTab);
-    }
-    if (page !== 'noticias') {
-      setSelectedArticleId(null);
-    }
-    setMenuOpen(false);
+  // Carousel calculation: 3 cards per view on desktop, 1 card step
+  const articlesList = t.noticias.articles;
+  const cardsPerView = 3;
+  const maxSlideIndex = Math.max(0, articlesList.length - cardsPerView);
+
+  const handlePrevArticleSlide = () => {
+    setArticleSlideIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNextArticleSlide = () => {
+    setArticleSlideIndex((prev) => Math.min(maxSlideIndex, prev + 1));
+  };
+
+  const handleSelectLawyer = (lawyerId) => {
+    setActiveLawyerId(lawyerId);
+    window.location.hash = `#/escritorio/equipe/${lawyerId}`;
+  };
+
+  const handleSelectArea = (areaId) => {
+    setActiveServiceId(areaId);
+    window.location.hash = `#/escritorio/areas/${areaId}`;
   };
 
   const handleOpenArticle = (articleId) => {
     setSelectedArticleId(articleId);
+    window.location.hash = `#/noticias/${articleId}`;
   };
 
   const handleBackToArticlesList = () => {
     setSelectedArticleId(null);
+    window.location.hash = `#/noticias`;
   };
 
   const currentSelectedLawyer = t.escritorio.lawyers.find(l => l.id === activeLawyerId) || t.escritorio.lawyers[0] || null;
@@ -178,26 +295,29 @@ export default function Home({ onNavigateToAdmin }) {
 
   return (
     <div className="home-container">
-      {/* Background Overlay for readability */}
+      {/* Background Overlay */}
       <div className="background-overlay"></div>
 
-      {/* Top Header Section */}
+      {/* Top Header Section (Floating transparent header) */}
       <header className="home-header">
-        <div className="logo-container" onClick={() => navigateTo('home')} style={{ cursor: 'pointer' }}>
-          <div className="brand-logo-header">
-            <div className="brand-logo-monogram">EF</div>
-            <div className="brand-logo-text">
-              <span className="brand-logo-name">EDUARDO FERRARI</span>
-              <span className="brand-logo-sub">ADVOGADOS ASSOCIADOS</span>
-            </div>
-          </div>
+        <div 
+          className="logo-container" 
+          onClick={() => navigateToHash('home')} 
+          style={{ cursor: 'pointer' }}
+          title="Eduardo Ferrari Advocacia - Página Inicial"
+        >
+          <img 
+            src="/image/logo ferrari-escritorio-28-11-25.jpg" 
+            alt="Eduardo Ferrari Advocacia" 
+            className="site-header-logo-img" 
+          />
         </div>
 
         {/* Desktop Inline Navigation */}
         <nav className="desktop-nav">
           <button 
             className={`nav-btn ${currentPage === 'home' ? 'active' : ''}`} 
-            onClick={() => navigateTo('home')}
+            onClick={() => navigateToHash('home')}
           >
             {t.nav.home}
           </button>
@@ -206,7 +326,7 @@ export default function Home({ onNavigateToAdmin }) {
           <div className="nav-dropdown-item">
             <button 
               className={`nav-btn ${currentPage === 'escritorio' ? 'active' : ''}`} 
-              onClick={() => navigateTo('escritorio')}
+              onClick={() => navigateToHash('escritorio')}
             >
               {t.nav.escritorio}
               <span className="dropdown-caret">▾</span>
@@ -214,13 +334,13 @@ export default function Home({ onNavigateToAdmin }) {
             <div className="nav-dropdown-menu">
               <button 
                 className={`dropdown-sublink ${currentPage === 'escritorio' && officeTab === 'equipe' ? 'active' : ''}`}
-                onClick={(e) => { e.stopPropagation(); navigateTo('escritorio', 'equipe'); }}
+                onClick={(e) => { e.stopPropagation(); navigateToHash('escritorio', 'equipe'); }}
               >
                 {t.escritorio.equipeTab}
               </button>
               <button 
                 className={`dropdown-sublink ${currentPage === 'escritorio' && officeTab === 'areas' ? 'active' : ''}`}
-                onClick={(e) => { e.stopPropagation(); navigateTo('escritorio', 'areas'); }}
+                onClick={(e) => { e.stopPropagation(); navigateToHash('escritorio', 'areas'); }}
               >
                 {t.escritorio.areasTab}
               </button>
@@ -229,13 +349,23 @@ export default function Home({ onNavigateToAdmin }) {
 
           <button 
             className={`nav-btn ${currentPage === 'noticias' ? 'active' : ''}`} 
-            onClick={() => navigateTo('noticias')}
+            onClick={() => navigateToHash('noticias')}
           >
             {t.nav.noticias}
           </button>
+
+          {/* 5th Navigation Button: Área do Cliente */}
+          <button 
+            className={`nav-btn client-nav-btn ${currentPage === 'cliente' ? 'active' : ''}`} 
+            onClick={() => navigateToHash('cliente')}
+          >
+            <span className="client-nav-icon">🔒</span>
+            <span>{t.nav.areaCliente}</span>
+          </button>
+
           <button 
             className={`nav-btn ${currentPage === 'contato' ? 'active' : ''}`} 
-            onClick={() => navigateTo('contato')}
+            onClick={() => navigateToHash('contato')}
           >
             {t.nav.contato}
           </button>
@@ -258,7 +388,7 @@ export default function Home({ onNavigateToAdmin }) {
         <nav className="drawer-nav">
           <button 
             className={`drawer-link ${currentPage === 'home' ? 'active' : ''}`}
-            onClick={() => navigateTo('home')}
+            onClick={() => navigateToHash('home')}
           >
             {t.nav.home}
           </button>
@@ -266,20 +396,20 @@ export default function Home({ onNavigateToAdmin }) {
           <div className="drawer-group">
             <button 
               className={`drawer-link ${currentPage === 'escritorio' ? 'active' : ''}`}
-              onClick={() => navigateTo('escritorio')}
+              onClick={() => navigateToHash('escritorio')}
             >
               {t.nav.escritorio}
             </button>
             <div className="drawer-sublinks-container">
               <button 
                 className={`drawer-subitem ${currentPage === 'escritorio' && officeTab === 'equipe' ? 'active' : ''}`}
-                onClick={() => navigateTo('escritorio', 'equipe')}
+                onClick={() => navigateToHash('escritorio', 'equipe')}
               >
                 ↳ {t.escritorio.equipeTab}
               </button>
               <button 
                 className={`drawer-subitem ${currentPage === 'escritorio' && officeTab === 'areas' ? 'active' : ''}`}
-                onClick={() => navigateTo('escritorio', 'areas')}
+                onClick={() => navigateToHash('escritorio', 'areas')}
               >
                 ↳ {t.escritorio.areasTab}
               </button>
@@ -288,21 +418,29 @@ export default function Home({ onNavigateToAdmin }) {
 
           <button 
             className={`drawer-link ${currentPage === 'noticias' ? 'active' : ''}`}
-            onClick={() => navigateTo('noticias')}
+            onClick={() => navigateToHash('noticias')}
           >
             {t.nav.noticias}
           </button>
+
+          <button 
+            className={`drawer-link ${currentPage === 'cliente' ? 'active' : ''}`}
+            onClick={() => navigateToHash('cliente')}
+          >
+            🔒 {t.nav.areaCliente}
+          </button>
+
           <button 
             className={`drawer-link ${currentPage === 'contato' ? 'active' : ''}`}
-            onClick={() => navigateTo('contato')}
+            onClick={() => navigateToHash('contato')}
           >
             {t.nav.contato}
           </button>
 
-          <div style={{ marginTop: '20px', borderTop: '1px solid rgba(240, 105, 73, 0.2)', paddingTop: '15px' }}>
+          <div style={{ marginTop: '20px', borderTop: '1px solid rgba(15, 43, 72, 0.15)', paddingTop: '15px' }}>
             <button 
               className="drawer-subitem" 
-              style={{ color: '#f06949', opacity: 0.9 }}
+              style={{ color: '#0f2b48', opacity: 0.9, fontWeight: '700' }}
               onClick={onNavigateToAdmin}
             >
               ⚙️ {t.adminLink}
@@ -316,14 +454,18 @@ export default function Home({ onNavigateToAdmin }) {
 
       {/* Dynamic Screen Content Wrapper */}
       <div className="app-screen-content">
-        {/* Screen: Home Hero (EDUARDO FERRARI) */}
+        
+        {/* Screen 1: Home Hero (EDUARDO FERRARI) */}
         {currentPage === 'home' && (
           <section className="screen-section home-hero-view">
             <div className="brand-block">
-              <h1 className="brand-subtitle">
-                <span className="brand-row">EDUARDO</span>
-                <span className="brand-row">FERRARI</span>
-              </h1>
+              <div className="hero-logo-wrapper">
+                <img 
+                  src="/image/logo ferrari-escritorio-28-11-25.jpg" 
+                  alt="Eduardo Ferrari Advocacia" 
+                  className="hero-main-logo-img" 
+                />
+              </div>
               <div className="brand-tagline">{t.hero.tagline}</div>
             </div>
             <footer className="footer-bar">
@@ -339,7 +481,7 @@ export default function Home({ onNavigateToAdmin }) {
           </section>
         )}
 
-        {/* Screen: O Escritório (Sub-tabs: A Equipe | Áreas de Atuação) */}
+        {/* Screen 2: O Escritório (Sub-tabs: A Equipe | Áreas de Atuação) */}
         {currentPage === 'escritorio' && (
           <section className="screen-section scrollable-view">
             <div className="section-inner-container">
@@ -349,14 +491,14 @@ export default function Home({ onNavigateToAdmin }) {
                 <div className="office-tab-switch-group">
                   <button
                     className={`office-switcher-btn ${officeTab === 'equipe' ? 'active' : ''}`}
-                    onClick={() => setOfficeTab('equipe')}
+                    onClick={() => navigateToHash('escritorio', 'equipe')}
                   >
                     <span className="switch-bullet"></span>
                     <span>{t.escritorio.equipeTab}</span>
                   </button>
                   <button
                     className={`office-switcher-btn ${officeTab === 'areas' ? 'active' : ''}`}
-                    onClick={() => setOfficeTab('areas')}
+                    onClick={() => navigateToHash('escritorio', 'areas')}
                   >
                     <span className="switch-bullet"></span>
                     <span>{t.escritorio.areasTab}</span>
@@ -373,7 +515,7 @@ export default function Home({ onNavigateToAdmin }) {
                       <button
                         key={lawyer.id}
                         className={`service-tab-btn ${activeLawyerId === lawyer.id ? 'active' : ''}`}
-                        onClick={() => setActiveLawyerId(lawyer.id)}
+                        onClick={() => handleSelectLawyer(lawyer.id)}
                       >
                         <span className="tab-indicator"></span>
                         {lawyer.label || lawyer.name.toUpperCase()}
@@ -456,7 +598,7 @@ export default function Home({ onNavigateToAdmin }) {
                       <button
                         key={service.id}
                         className={`service-tab-btn ${activeServiceId === service.id ? 'active' : ''}`}
-                        onClick={() => setActiveServiceId(service.id)}
+                        onClick={() => handleSelectArea(service.id)}
                       >
                         <span className="tab-indicator"></span>
                         {service.label}
@@ -503,12 +645,12 @@ export default function Home({ onNavigateToAdmin }) {
           </section>
         )}
 
-        {/* Screen: Noticias & Artigos (Supports Grid list AND Full Article Reading Mode with Video) */}
+        {/* Screen 3: Noticias & Artigos */}
         {currentPage === 'noticias' && (
           <section className="screen-section scrollable-view">
             <div className="section-inner-container">
               
-              {/* MODE 1: FULL ARTICLE READER */}
+              {/* MODE 1: FULL ARTICLE READER (Shareable URL: #/noticias/art-1) */}
               {currentReadingArticle ? (
                 <div className="article-reader-container animate-fade">
                   {/* Back button */}
@@ -575,8 +717,9 @@ export default function Home({ onNavigateToAdmin }) {
                     <button 
                       className="reader-whatsapp-btn"
                       onClick={() => {
+                        const phoneNumber = (cmsContact && cmsContact.whatsappNumber) ? cmsContact.whatsappNumber.replace(/\D/g, '') : "5511988994871";
                         const text = `Olá, gostaria de conversar sobre o artigo "${currentReadingArticle.title}" que li no site de Eduardo Ferrari Advogados.`;
-                        window.open(`https://api.whatsapp.com/send?phone=5511988994871&text=${encodeURIComponent(text)}`, '_blank');
+                        window.open(`https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(text)}`, '_blank');
                       }}
                     >
                       {t.noticias.contactBtn}
@@ -593,39 +736,102 @@ export default function Home({ onNavigateToAdmin }) {
                   </div>
                 </div>
               ) : (
-                /* MODE 2: ARTICLES GRID LIST */
+                /* MODE 2: ARTICLES CAROUSEL LIST */
                 <div className="articles-list-view animate-fade">
                   <h2 className="section-heading">{t.noticias.heading}</h2>
                   <div className="section-divider"></div>
 
-                  <div className="articles-grid">
-                    {t.noticias.articles.map((article, index) => (
-                      <article key={article.id || index} className="article-card animate-fade">
-                        <div className="article-card-top">
-                          <span className="article-category">{article.category}</span>
-                          {article.videoUrl && (
-                            <span className="article-video-pill" title="Este artigo inclui vídeo">🎥 Vídeo</span>
-                          )}
-                        </div>
+                  {/* Carousel Container with Left/Right Navigation Arrows */}
+                  <div className="articles-carousel-wrapper">
+                    
+                    {/* Left Navigation Arrow */}
+                    <button 
+                      className="carousel-arrow-btn prev-arrow" 
+                      onClick={handlePrevArticleSlide}
+                      disabled={articleSlideIndex === 0}
+                      title="Artigos Anteriores"
+                      aria-label="Artigos Anteriores"
+                    >
+                      ‹
+                    </button>
 
-                        <h3 className="article-title">{article.title}</h3>
-                        
-                        <div className="article-meta-info">
-                          <span className="article-date">{article.date}</span>
-                          {article.author && <span className="article-author-name">• {article.author}</span>}
-                        </div>
+                    {/* Cards Slider Viewport */}
+                    <div className="articles-carousel-viewport">
+                      <div 
+                        className="articles-carousel-track"
+                        style={{
+                          transform: `translateX(-${articleSlideIndex * (100 / Math.min(articlesList.length, 3))}%)`
+                        }}
+                      >
+                        {articlesList.map((article, index) => (
+                          <article key={article.id || index} className="article-card carousel-card animate-fade">
+                            
+                            {/* Card Top: Category & Video Pill */}
+                            <div className="article-card-top">
+                              <span className="article-category">{article.category}</span>
+                              {article.videoUrl && (
+                                <span className="article-video-pill" title="Este artigo inclui vídeo explicativo">
+                                  🎥 Vídeo
+                                </span>
+                              )}
+                            </div>
 
-                        <p className="article-desc">{article.desc || (Array.isArray(article.paragraphs) ? article.paragraphs[0] : '')}</p>
-                        
-                        <button 
-                          className="article-link-btn"
-                          onClick={() => handleOpenArticle(article.id)}
-                        >
-                          {t.noticias.readMore}
-                        </button>
-                      </article>
-                    ))}
+                            {/* Prominent Creation Date Badge */}
+                            <div className="article-card-date-badge">
+                              <span className="date-badge-icon">📅</span>
+                              <span className="date-badge-text">{article.date}</span>
+                            </div>
+
+                            <h3 className="article-title">{article.title}</h3>
+                            
+                            {article.author && (
+                              <div className="article-author-row">
+                                <span className="author-icon">✍️</span>
+                                <span className="article-author-name">{article.author}</span>
+                              </div>
+                            )}
+
+                            <p className="article-desc">
+                              {article.desc || (Array.isArray(article.paragraphs) ? article.paragraphs[0] : '')}
+                            </p>
+                            
+                            <button 
+                              className="article-link-btn"
+                              onClick={() => handleOpenArticle(article.id)}
+                            >
+                              {t.noticias.readMore}
+                            </button>
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Right Navigation Arrow */}
+                    <button 
+                      className="carousel-arrow-btn next-arrow" 
+                      onClick={handleNextArticleSlide}
+                      disabled={articleSlideIndex >= maxSlideIndex}
+                      title="Próximos Artigos"
+                      aria-label="Próximos Artigos"
+                    >
+                      ›
+                    </button>
                   </div>
+
+                  {/* Carousel Pagination Dots */}
+                  {maxSlideIndex > 0 && (
+                    <div className="carousel-dots-container">
+                      {Array.from({ length: maxSlideIndex + 1 }).map((_, dotIdx) => (
+                        <button
+                          key={dotIdx}
+                          className={`carousel-dot ${articleSlideIndex === dotIdx ? 'active' : ''}`}
+                          onClick={() => setArticleSlideIndex(dotIdx)}
+                          aria-label={`Slide ${dotIdx + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
                 </div>
               )}
 
@@ -643,7 +849,30 @@ export default function Home({ onNavigateToAdmin }) {
           </section>
         )}
 
-        {/* Screen: Contato */}
+        {/* Screen 4: Área do Cliente (Process Tracking & Digital Documents Portal) */}
+        {currentPage === 'cliente' && (
+          <section className="screen-section scrollable-view">
+            <div className="section-inner-container">
+              <ClientArea 
+                onBackToHome={() => navigateToHash('home')} 
+                whatsappContactNumber={cmsContact?.whatsappNumber || "5511988994871"}
+                lang={lang}
+              />
+            </div>
+            <footer className="footer-bar inner-footer">
+              <span>&copy; {new Date().getFullYear()} {t.footer}</span>
+              <button 
+                className="footer-admin-link"
+                onClick={onNavigateToAdmin}
+                title="Acessar o Gerenciador de Conteúdo CMS"
+              >
+                🔒 {t.adminLink}
+              </button>
+            </footer>
+          </section>
+        )}
+
+        {/* Screen 5: Contato */}
         {currentPage === 'contato' && (
           <section className="screen-section scrollable-view">
             <div className="section-inner-container">
@@ -651,7 +880,7 @@ export default function Home({ onNavigateToAdmin }) {
               <div className="section-divider"></div>
               <div className="contact-grid">
                 <div className="contact-info animate-fade">
-                  <h3 className="contact-info-title">EDUARDO FERRARI ADVOGADOS ASSOCIADOS</h3>
+                  <h3 className="contact-info-title">{t.contato.companyName}</h3>
                   <p className="contact-info-text">{t.contato.subtitle}</p>
                   <div className="contact-details">
                     <div className="detail-item">

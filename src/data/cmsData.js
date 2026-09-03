@@ -212,9 +212,21 @@ export const INITIAL_ARTICLES = [
   }
 ];
 
+export const INITIAL_CONTACT = {
+  title: 'Fale Conosco',
+  companyName: 'EDUARDO FERRARI ADVOGADOS ASSOCIADOS',
+  subtitle: 'Agende uma consulta presencial ou remota com nossa equipe de especialistas jurídicos.',
+  address: 'Al. Tangará, 80, Sala 1, The Point Office, Cotia-SP, CEP 06711-020',
+  phone: '+55 (11) 98899-4871',
+  whatsappNumber: '5511988994871',
+  email: 'contato@zsaa.com.br',
+  hours: 'Segunda a Sexta - 09:00 às 18:00'
+};
+
 const STORAGE_KEY_LAWYERS = 'ef_cms_lawyers_v1';
 const STORAGE_KEY_AREAS = 'ef_cms_areas_v1';
 const STORAGE_KEY_ARTICLES = 'ef_cms_articles_v1';
+const STORAGE_KEY_CONTACT = 'ef_cms_contact_v1';
 
 export function getStoredLawyers() {
   try {
@@ -285,10 +297,34 @@ export function saveStoredArticles(articles) {
   }
 }
 
+export function getStoredContact() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_CONTACT);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEY_CONTACT, JSON.stringify(INITIAL_CONTACT));
+      return INITIAL_CONTACT;
+    }
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : INITIAL_CONTACT;
+  } catch {
+    return INITIAL_CONTACT;
+  }
+}
+
+export function saveStoredContact(contact) {
+  try {
+    localStorage.setItem(STORAGE_KEY_CONTACT, JSON.stringify(contact));
+    window.dispatchEvent(new Event('cms_data_updated'));
+  } catch (e) {
+    console.error('Error saving contact to localStorage:', e);
+  }
+}
+
 export function resetCmsDefaults() {
   localStorage.setItem(STORAGE_KEY_LAWYERS, JSON.stringify(INITIAL_LAWYERS));
   localStorage.setItem(STORAGE_KEY_AREAS, JSON.stringify(INITIAL_AREAS));
   localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(INITIAL_ARTICLES));
+  localStorage.setItem(STORAGE_KEY_CONTACT, JSON.stringify(INITIAL_CONTACT));
   window.dispatchEvent(new Event('cms_data_updated'));
 }
 
