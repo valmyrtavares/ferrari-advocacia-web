@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getStoredLawyers, getStoredAreas } from '../data/cmsData';
+import { getStoredLawyers, getStoredAreas, getStoredArticles, getEmbedVideoUrl } from '../data/cmsData';
 
 export default function Home({ onNavigateToAdmin }) {
   const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'escritorio' | 'noticias' | 'contato'
@@ -7,18 +7,19 @@ export default function Home({ onNavigateToAdmin }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeServiceId, setActiveServiceId] = useState('quem-somos');
   const [activeLawyerId, setActiveLawyerId] = useState('eduardo');
+  const [selectedArticleId, setSelectedArticleId] = useState(null); // Article ID for full-reading mode
   const [lang, setLang] = useState('pt'); // 'pt' | 'en'
 
   // Dynamic CMS Data from LocalStorage
   const [cmsLawyers, setCmsLawyers] = useState(getStoredLawyers);
   const [cmsAreas, setCmsAreas] = useState(getStoredAreas);
+  const [cmsArticles, setCmsArticles] = useState(getStoredArticles);
 
   useEffect(() => {
     const handleCmsUpdate = () => {
-      const updatedLawyers = getStoredLawyers();
-      const updatedAreas = getStoredAreas();
-      setCmsLawyers(updatedLawyers);
-      setCmsAreas(updatedAreas);
+      setCmsLawyers(getStoredLawyers());
+      setCmsAreas(getStoredAreas());
+      setCmsArticles(getStoredArticles());
     };
 
     window.addEventListener('cms_data_updated', handleCmsUpdate);
@@ -48,27 +49,13 @@ export default function Home({ onNavigateToAdmin }) {
       },
       noticias: {
         heading: 'Notícias & Artigos',
+        subtitle: 'Análises jurídicas estratégicas, decisões recentes e atualizações legislativas.',
         readMore: 'Ler Artigo Integral →',
-        articles: [
-          {
-            title: 'Planejamento Sucessório Familiar em 2026',
-            category: 'Direito de Família e Sucessões',
-            date: '15 de Junho, 2026',
-            desc: 'Entenda os impactos das novas regras jurídicas e como proteger o patrimônio da sua família de forma estratégica e legal.'
-          },
-          {
-            title: 'Reestruturação Tributária pós-Reforma',
-            category: 'Direito Tributário',
-            date: '08 de Junho, 2026',
-            desc: 'Uma análise detalhada sobre a transição de tributos e as oportunidades legais de elisão fiscal para o setor industrial brasileiro.'
-          },
-          {
-            title: 'LGPD e a Responsabilidade dos Sócios',
-            category: 'Compliance Digital',
-            date: '28 de Maio, 2026',
-            desc: 'Como as recentes decisões judiciais responsabilizam administradores pela segurança da informação e proteção de dados nas empresas.'
-          }
-        ]
+        backToList: '← Voltar para Todos os Artigos',
+        videoLabel: 'Vídeo Explicativo:',
+        contactCta: 'Deseja esclarecer dúvidas sobre este tema? Entre em contato com nosso escritório.',
+        contactBtn: 'Falar com um Advogado via WhatsApp',
+        articles: cmsArticles
       },
       contato: {
         heading: 'Fale Conosco',
@@ -107,27 +94,13 @@ export default function Home({ onNavigateToAdmin }) {
       },
       noticias: {
         heading: 'News & Articles',
+        subtitle: 'Strategic legal insights, recent court decisions, and regulatory updates.',
         readMore: 'Read Full Article →',
-        articles: [
-          {
-            title: 'Family Estate Planning in 2026',
-            category: 'Family & Probate Law',
-            date: 'June 15, 2026',
-            desc: 'Understand the impacts of new legal regulations and how to protect your family wealth strategically and legally.'
-          },
-          {
-            title: 'Post-Reform Tax Restructuring',
-            category: 'Tax Law',
-            date: 'June 08, 2026',
-            desc: 'A detailed analysis of the tax transition and legal opportunities for tax efficiency for the Brazilian industrial sector.'
-          },
-          {
-            title: 'LGPD & Partners Liability',
-            category: 'Digital Compliance',
-            date: 'May 28, 2026',
-            desc: 'How recent judicial decisions hold administrators responsible for information security and data protection in companies.'
-          }
-        ]
+        backToList: '← Back to All Articles',
+        videoLabel: 'Video Commentary:',
+        contactCta: 'Have questions regarding this legal topic? Contact our legal team.',
+        contactBtn: 'Talk to an Attorney on WhatsApp',
+        articles: cmsArticles
       },
       contato: {
         heading: 'Contact Us',
@@ -185,11 +158,23 @@ export default function Home({ onNavigateToAdmin }) {
     if (subTab) {
       setOfficeTab(subTab);
     }
+    if (page !== 'noticias') {
+      setSelectedArticleId(null);
+    }
     setMenuOpen(false);
+  };
+
+  const handleOpenArticle = (articleId) => {
+    setSelectedArticleId(articleId);
+  };
+
+  const handleBackToArticlesList = () => {
+    setSelectedArticleId(null);
   };
 
   const currentSelectedLawyer = t.escritorio.lawyers.find(l => l.id === activeLawyerId) || t.escritorio.lawyers[0] || null;
   const currentSelectedArea = t.escritorio.areas.find(s => s.id === activeServiceId) || t.escritorio.areas[0] || null;
+  const currentReadingArticle = selectedArticleId ? t.noticias.articles.find(a => a.id === selectedArticleId) : null;
 
   return (
     <div className="home-container">
@@ -359,7 +344,7 @@ export default function Home({ onNavigateToAdmin }) {
           <section className="screen-section scrollable-view">
             <div className="section-inner-container">
               
-              {/* Top Submenu Switcher Tabs (In place of "Nossos Serviços" title) */}
+              {/* Top Submenu Switcher Tabs */}
               <div className="office-tab-switch-header">
                 <div className="office-tab-switch-group">
                   <button
@@ -518,25 +503,132 @@ export default function Home({ onNavigateToAdmin }) {
           </section>
         )}
 
-        {/* Screen: Noticias & Artigos */}
+        {/* Screen: Noticias & Artigos (Supports Grid list AND Full Article Reading Mode with Video) */}
         {currentPage === 'noticias' && (
           <section className="screen-section scrollable-view">
             <div className="section-inner-container">
-              <h2 className="section-heading">{t.noticias.heading}</h2>
-              <div className="section-divider"></div>
-              <div className="articles-grid">
-                {t.noticias.articles.map((article, index) => (
-                  <article key={index} className="article-card animate-fade">
-                    <span className="article-category">{article.category}</span>
-                    <h3 className="article-title">{article.title}</h3>
-                    <span className="article-date">{article.date}</span>
-                    <p className="article-desc">{article.desc}</p>
-                    <a href={`#article-${index}`} className="article-link" onClick={(e) => e.preventDefault()}>
-                      {t.noticias.readMore}
-                    </a>
-                  </article>
-                ))}
-              </div>
+              
+              {/* MODE 1: FULL ARTICLE READER */}
+              {currentReadingArticle ? (
+                <div className="article-reader-container animate-fade">
+                  {/* Back button */}
+                  <div className="reader-top-actions">
+                    <button 
+                      className="reader-back-btn"
+                      onClick={handleBackToArticlesList}
+                    >
+                      {t.noticias.backToList}
+                    </button>
+                  </div>
+
+                  {/* Article Header */}
+                  <div className="reader-header">
+                    <span className="reader-category-badge">{currentReadingArticle.category}</span>
+                    <h1 className="reader-title">{currentReadingArticle.title}</h1>
+                    <div className="reader-meta-bar">
+                      <span className="reader-date">📅 {currentReadingArticle.date}</span>
+                      {currentReadingArticle.author && (
+                        <span className="reader-author">✍️ Por: {currentReadingArticle.author}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="reader-divider"></div>
+
+                  {/* Optional Video Embed Player */}
+                  {currentReadingArticle.videoUrl && (
+                    <div className="reader-video-section">
+                      <div className="reader-video-header">
+                        <span className="video-icon-tag">🎥</span>
+                        <span className="video-header-text">{t.noticias.videoLabel}</span>
+                      </div>
+                      <div className="reader-video-player-frame">
+                        <iframe 
+                          src={getEmbedVideoUrl(currentReadingArticle.videoUrl)} 
+                          title={currentReadingArticle.title}
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowFullScreen
+                          className="reader-iframe"
+                        ></iframe>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Article Body Content */}
+                  <div className="reader-body">
+                    {Array.isArray(currentReadingArticle.paragraphs) ? (
+                      currentReadingArticle.paragraphs.map((paragraph, idx) => (
+                        <p key={idx} className="reader-paragraph">{paragraph}</p>
+                      ))
+                    ) : (
+                      <p className="reader-paragraph">{currentReadingArticle.paragraphs}</p>
+                    )}
+                  </div>
+
+                  {/* Bottom Contact Callout */}
+                  <div className="reader-cta-box">
+                    <div className="reader-cta-info">
+                      <span className="cta-icon">⚖️</span>
+                      <p className="cta-text">{t.noticias.contactCta}</p>
+                    </div>
+                    <button 
+                      className="reader-whatsapp-btn"
+                      onClick={() => {
+                        const text = `Olá, gostaria de conversar sobre o artigo "${currentReadingArticle.title}" que li no site de Eduardo Ferrari Advogados.`;
+                        window.open(`https://api.whatsapp.com/send?phone=5511988994871&text=${encodeURIComponent(text)}`, '_blank');
+                      }}
+                    >
+                      {t.noticias.contactBtn}
+                    </button>
+                  </div>
+
+                  <div className="reader-bottom-nav">
+                    <button 
+                      className="reader-back-btn"
+                      onClick={handleBackToArticlesList}
+                    >
+                      {t.noticias.backToList}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* MODE 2: ARTICLES GRID LIST */
+                <div className="articles-list-view animate-fade">
+                  <h2 className="section-heading">{t.noticias.heading}</h2>
+                  <div className="section-divider"></div>
+
+                  <div className="articles-grid">
+                    {t.noticias.articles.map((article, index) => (
+                      <article key={article.id || index} className="article-card animate-fade">
+                        <div className="article-card-top">
+                          <span className="article-category">{article.category}</span>
+                          {article.videoUrl && (
+                            <span className="article-video-pill" title="Este artigo inclui vídeo">🎥 Vídeo</span>
+                          )}
+                        </div>
+
+                        <h3 className="article-title">{article.title}</h3>
+                        
+                        <div className="article-meta-info">
+                          <span className="article-date">{article.date}</span>
+                          {article.author && <span className="article-author-name">• {article.author}</span>}
+                        </div>
+
+                        <p className="article-desc">{article.desc || (Array.isArray(article.paragraphs) ? article.paragraphs[0] : '')}</p>
+                        
+                        <button 
+                          className="article-link-btn"
+                          onClick={() => handleOpenArticle(article.id)}
+                        >
+                          {t.noticias.readMore}
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              )}
+
             </div>
             <footer className="footer-bar inner-footer">
               <span>&copy; {new Date().getFullYear()} {t.footer}</span>

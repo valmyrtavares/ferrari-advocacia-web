@@ -4,15 +4,19 @@ import {
   saveStoredLawyers,
   getStoredAreas,
   saveStoredAreas,
-  resetCmsDefaults
+  getStoredArticles,
+  saveStoredArticles,
+  resetCmsDefaults,
+  getEmbedVideoUrl
 } from '../data/cmsData';
 
 export default function Admin({ onNavigateToSite }) {
-  const [activeTab, setActiveTab] = useState('escritorio'); // 'escritorio' | 'dashboard'
+  const [activeTab, setActiveTab] = useState('escritorio'); // 'escritorio' | 'artigos' | 'dashboard'
   const [subTab, setSubTab] = useState('equipe'); // 'equipe' | 'areas'
   
   const [lawyers, setLawyers] = useState([]);
   const [areas, setAreas] = useState([]);
+  const [articles, setArticles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Modals / Editor State for Lawyer
@@ -39,10 +43,24 @@ export default function Admin({ onNavigateToSite }) {
     paragraphs: ''
   });
 
+  // Modals / Editor State for Article
+  const [articleModalOpen, setArticleModalOpen] = useState(false);
+  const [articleModalMode, setArticleModalMode] = useState('add'); // 'add' | 'edit' | 'view'
+  const [editingArticle, setEditingArticle] = useState({
+    id: '',
+    title: '',
+    category: '',
+    date: '',
+    author: '',
+    desc: '',
+    videoUrl: '',
+    paragraphs: ''
+  });
+
   // Delete Confirmation Modal
   const [deleteConfirm, setDeleteConfirm] = useState({
     open: false,
-    type: '', // 'lawyer' | 'area'
+    type: '', // 'lawyer' | 'area' | 'article'
     id: '',
     name: ''
   });
@@ -61,6 +79,7 @@ export default function Admin({ onNavigateToSite }) {
   const loadData = () => {
     setLawyers(getStoredLawyers());
     setAreas(getStoredAreas());
+    setArticles(getStoredArticles());
   };
 
   useEffect(() => {
@@ -276,6 +295,101 @@ export default function Admin({ onNavigateToSite }) {
     });
   };
 
+  // --- ARTICLE CRUD ---
+  const handleOpenAddArticle = () => {
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    setEditingArticle({
+      id: '',
+      title: '',
+      category: 'Direito Geral',
+      date: formattedDate,
+      author: 'Dr. Eduardo Ferrari',
+      desc: '',
+      videoUrl: '',
+      paragraphs: ''
+    });
+    setArticleModalMode('add');
+    setArticleModalOpen(true);
+  };
+
+  const handleOpenEditArticle = (article) => {
+    setEditingArticle({
+      id: article.id,
+      title: article.title || '',
+      category: article.category || '',
+      date: article.date || '',
+      author: article.author || '',
+      desc: article.desc || '',
+      videoUrl: article.videoUrl || '',
+      paragraphs: Array.isArray(article.paragraphs) ? article.paragraphs.join('\n\n') : (article.paragraphs || '')
+    });
+    setArticleModalMode('edit');
+    setArticleModalOpen(true);
+  };
+
+  const handleOpenViewArticle = (article) => {
+    setEditingArticle({
+      id: article.id,
+      title: article.title || '',
+      category: article.category || '',
+      date: article.date || '',
+      author: article.author || '',
+      desc: article.desc || '',
+      videoUrl: article.videoUrl || '',
+      paragraphs: Array.isArray(article.paragraphs) ? article.paragraphs.join('\n\n') : (article.paragraphs || '')
+    });
+    setArticleModalMode('view');
+    setArticleModalOpen(true);
+  };
+
+  const handleSaveArticle = (e) => {
+    e.preventDefault();
+    if (!editingArticle.title.trim()) {
+      showToast('O título do artigo é obrigatório.', 'error');
+      return;
+    }
+
+    const paragraphsArray = editingArticle.paragraphs
+      .split('\n\n')
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+
+    const articleData = {
+      id: editingArticle.id || `art-${Date.now()}`,
+      title: editingArticle.title.trim(),
+      category: editingArticle.category.trim() || 'Direito Geral',
+      date: editingArticle.date.trim() || '2026',
+      author: editingArticle.author.trim() || 'Eduardo Ferrari Advogados',
+      desc: editingArticle.desc.trim() || (paragraphsArray[0] ? paragraphsArray[0].slice(0, 160) + '...' : 'Confira a análise jurídica completa.'),
+      videoUrl: editingArticle.videoUrl.trim() || '',
+      paragraphs: paragraphsArray.length > 0 ? paragraphsArray : [editingArticle.desc || 'Artigo jurídico em elaboração.']
+    };
+
+    let updatedList;
+    if (articleModalMode === 'add') {
+      updatedList = [articleData, ...articles];
+      showToast(`Artigo "${articleData.title}" publicado com sucesso!`);
+    } else {
+      updatedList = articles.map(a => (a.id === articleData.id ? articleData : a));
+      showToast(`Artigo "${articleData.title}" atualizado com sucesso!`);
+    }
+
+    saveStoredArticles(updatedList);
+    setArticles(updatedList);
+    setArticleModalOpen(false);
+  };
+
+  const handleDeleteArticleConfirm = (id, name) => {
+    setDeleteConfirm({
+      open: true,
+      type: 'article',
+      id,
+      name
+    });
+  };
+
+  // Execute Delete
   const handleExecuteDelete = () => {
     if (deleteConfirm.type === 'lawyer') {
       const updated = lawyers.filter(l => l.id !== deleteConfirm.id);
@@ -287,12 +401,17 @@ export default function Admin({ onNavigateToSite }) {
       saveStoredAreas(updated);
       setAreas(updated);
       showToast(`Área "${deleteConfirm.name}" excluída.`);
+    } else if (deleteConfirm.type === 'article') {
+      const updated = articles.filter(a => a.id !== deleteConfirm.id);
+      saveStoredArticles(updated);
+      setArticles(updated);
+      showToast(`Artigo "${deleteConfirm.name}" excluído.`);
     }
     setDeleteConfirm({ open: false, type: '', id: '', name: '' });
   };
 
   const handleResetDefaults = () => {
-    if (window.confirm('Tem certeza que deseja restaurar o conteúdo original padrão do site? Todas as alterações manuais serão resetadas.')) {
+    if (window.confirm('Tem certeza que deseja restaurar o conteúdo original padrão do site (Equipe, Áreas e Artigos com Vídeo)? Todas as alterações manuais serão resetadas.')) {
       resetCmsDefaults();
       loadData();
       showToast('Conteúdo do site restaurado para o padrão com sucesso!');
@@ -310,6 +429,14 @@ export default function Admin({ onNavigateToSite }) {
     a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     a.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const filteredArticles = articles.filter(a =>
+    a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    a.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (a.author && a.author.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const previewVideoEmbed = getEmbedVideoUrl(editingArticle.videoUrl);
 
   return (
     <div className="admin-root">
@@ -357,15 +484,23 @@ export default function Admin({ onNavigateToSite }) {
           
           <button 
             className={`admin-nav-btn ${activeTab === 'escritorio' ? 'active' : ''}`}
-            onClick={() => setActiveTab('escritorio')}
+            onClick={() => { setActiveTab('escritorio'); setSearchTerm(''); }}
           >
             <span className="nav-icon">📁</span>
             <span>O Escritório</span>
           </button>
 
           <button 
+            className={`admin-nav-btn ${activeTab === 'artigos' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('artigos'); setSearchTerm(''); }}
+          >
+            <span className="nav-icon">📰</span>
+            <span>Notícias & Artigos</span>
+          </button>
+
+          <button 
             className={`admin-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => { setActiveTab('dashboard'); setSearchTerm(''); }}
           >
             <span className="nav-icon">📊</span>
             <span>Visão Geral</span>
@@ -376,12 +511,14 @@ export default function Admin({ onNavigateToSite }) {
               <span className="status-dot"></span>
               <span>Armazenamento: LocalStorage Ativo</span>
             </div>
-            <div className="admin-version">CMS v1.2 • Eduardo Ferrari</div>
+            <div className="admin-version">CMS v1.3 • Eduardo Ferrari</div>
           </div>
         </aside>
 
         {/* Content Area */}
         <main className="admin-main">
+          
+          {/* TAB 1: O ESCRITÓRIO */}
           {activeTab === 'escritorio' && (
             <div className="admin-section-container animate-fade">
               {/* Top Sub-tabs Switcher */}
@@ -570,7 +707,116 @@ export default function Admin({ onNavigateToSite }) {
             </div>
           )}
 
-          {/* Tab: Dashboard / Visão Geral */}
+          {/* TAB 2: NOTÍCIAS & ARTIGOS (NEW TAB!) */}
+          {activeTab === 'artigos' && (
+            <div className="admin-section-container animate-fade">
+              <div className="admin-subtabs-bar">
+                <div className="admin-section-header-title">
+                  <h2 className="admin-sub-heading">Artigos, Notícias & Pareceres Jurídicos</h2>
+                  <span className="admin-sub-count">{articles.length} artigos cadastrados</span>
+                </div>
+
+                <div className="admin-subtab-actions">
+                  <button className="admin-btn-accent" onClick={handleOpenAddArticle}>
+                    + Publicar Novo Artigo
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="admin-search-wrapper">
+                <span className="search-icon">🔍</span>
+                <input 
+                  type="text" 
+                  className="admin-search-input"
+                  placeholder="Pesquisar artigos por título, categoria ou autor..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <button className="search-clear-btn" onClick={() => setSearchTerm('')}>✕</button>
+                )}
+              </div>
+
+              {/* Articles Grid */}
+              <div className="admin-items-list">
+                {filteredArticles.length === 0 ? (
+                  <div className="admin-empty-state">
+                    <p>Nenhum artigo encontrado com o termo "{searchTerm}".</p>
+                    <button className="admin-btn-secondary" onClick={handleOpenAddArticle}>
+                      + Publicar Novo Artigo
+                    </button>
+                  </div>
+                ) : (
+                  <div className="admin-cards-grid">
+                    {filteredArticles.map((article) => (
+                      <div key={article.id} className="admin-card">
+                        <div className="admin-card-header">
+                          <div className="article-icon-thumb">
+                            {article.videoUrl ? '🎥' : '📄'}
+                          </div>
+                          <div className="admin-card-info">
+                            <span className="admin-card-tag">{article.category}</span>
+                            <h3 className="admin-card-title">{article.title}</h3>
+                          </div>
+                        </div>
+
+                        <div className="admin-article-meta-row">
+                          <span className="meta-date">📅 {article.date}</span>
+                          {article.author && <span className="meta-author">✍️ {article.author}</span>}
+                        </div>
+
+                        <div className="admin-card-preview-text">
+                          {article.desc || (Array.isArray(article.paragraphs) ? article.paragraphs[0] : '')}
+                        </div>
+
+                        <div className="admin-card-badges">
+                          {article.videoUrl ? (
+                            <span className="admin-badge video-badge">
+                              🎥 Vídeo Anexado
+                            </span>
+                          ) : (
+                            <span className="admin-badge text-badge">
+                              📝 Leitura em Texto
+                            </span>
+                          )}
+                          <span className="admin-badge">
+                            📄 {Array.isArray(article.paragraphs) ? article.paragraphs.length : 1} parágrafos
+                          </span>
+                        </div>
+
+                        <div className="admin-card-actions">
+                          <button 
+                            className="card-action-btn view-btn"
+                            onClick={() => handleOpenViewArticle(article)}
+                            title="Consultar / Visualizar Íntegra"
+                          >
+                            👁️ Consultar
+                          </button>
+                          <button 
+                            className="card-action-btn edit-btn"
+                            onClick={() => handleOpenEditArticle(article)}
+                            title="Editar Artigo"
+                          >
+                            ✏️ Editar
+                          </button>
+                          <button 
+                            className="card-action-btn delete-btn"
+                            onClick={() => handleDeleteArticleConfirm(article.id, article.title)}
+                            title="Excluir Artigo"
+                          >
+                            🗑️ Excluir
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: DASHBOARD */}
           {activeTab === 'dashboard' && (
             <div className="admin-dashboard-view animate-fade">
               <h2 className="admin-view-title">Resumo do Sistema CMS</h2>
@@ -586,23 +832,24 @@ export default function Admin({ onNavigateToSite }) {
                   <div className="stat-label">Áreas de Atuação</div>
                 </div>
                 <div className="stat-card">
-                  <div className="stat-icon">⚡</div>
-                  <div className="stat-number">Tempo Real</div>
-                  <div className="stat-label">Sincronização com o Site</div>
+                  <div className="stat-icon">📰</div>
+                  <div className="stat-number">{articles.length}</div>
+                  <div className="stat-label">Notícias & Artigos</div>
                 </div>
               </div>
 
               <div className="dashboard-instructions-card">
-                <h3>💡 Como usar este Painel Administrativo</h3>
+                <h3>💡 Como gerenciar o conteúdo do site</h3>
                 <ul>
-                  <li><strong>A Equipe:</strong> Adicione, edite ou exclua advogados. Ao salvar, a alteração aparece imediatamente no site na aba <em>O Escritório → A Equipe</em>.</li>
-                  <li><strong>Áreas de Atuação:</strong> Personalize os textos e títulos das áreas de prática jurídica do escritório.</li>
-                  <li><strong>Fotos dos Advogados:</strong> Você pode fazer upload de fotos diretamente do seu computador (armazenadas em Base64 local) ou usar o avatar padrão com iniciais.</li>
-                  <li><strong>Restaurar Padrões:</strong> Se quiser voltar ao conteúdo original fornecido de demonstração, clique no botão <em>Restaurar Padrões</em> no topo.</li>
+                  <li><strong>O Escritório:</strong> Gerencie os membros da equipe jurídica (com fotos, qualificações e biografias) e as áreas de atuação prática.</li>
+                  <li><strong>Notícias & Artigos:</strong> Publique novos artigos com data, categoria, autor e URL de vídeo (YouTube, Vimeo) para que os clientes assistam e leiam o conteúdo integral.</li>
+                  <li><strong>Leitura Integral no Site:</strong> Ao clicar em <em>"Ler Artigo Integral →"</em> na área do cliente, o leitor abre uma tela dedicada com o artigo completo e o reprodutor de vídeo.</li>
+                  <li><strong>Restaurar Padrões:</strong> Use o botão no topo para restaurar as demonstrações originais sempre que necessário.</li>
                 </ul>
               </div>
             </div>
           )}
+
         </main>
       </div>
 
@@ -886,6 +1133,173 @@ export default function Admin({ onNavigateToSite }) {
                     </button>
                     <button type="submit" className="admin-btn-accent">
                       💾 Salvar Área
+                    </button>
+                  </>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- ARTICLE FORM MODAL (Add / Edit / View with Live Video Preview) --- */}
+      {articleModalOpen && (
+        <div className="admin-modal-backdrop" onClick={() => setArticleModalOpen(false)}>
+          <div className="admin-modal-window" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>
+                {articleModalMode === 'add' && '➕ Publicar Novo Artigo / Notícia'}
+                {articleModalMode === 'edit' && `✏️ Editar Artigo: ${editingArticle.title}`}
+                {articleModalMode === 'view' && `👁️ Visualizar Artigo: ${editingArticle.title}`}
+              </h3>
+              <button className="modal-close-btn" onClick={() => setArticleModalOpen(false)}>✕</button>
+            </div>
+
+            <form onSubmit={handleSaveArticle} className="admin-modal-form">
+              <div className="admin-modal-body">
+                
+                {/* Title */}
+                <div className="form-group">
+                  <label className="admin-form-label" htmlFor="art-title">Título do Artigo / Notícia *</label>
+                  <input 
+                    id="art-title"
+                    type="text" 
+                    className="admin-input" 
+                    placeholder="Ex: Planejamento Sucessório Familiar em 2026: Estratégias e Blindagem"
+                    value={editingArticle.title}
+                    onChange={(e) => setEditingArticle(prev => ({ ...prev, title: e.target.value }))}
+                    disabled={articleModalMode === 'view'}
+                    required
+                  />
+                </div>
+
+                {/* Category, Date & Author */}
+                <div className="form-row">
+                  <div className="form-group flex-1">
+                    <label className="admin-form-label" htmlFor="art-category">Categoria / Área *</label>
+                    <input 
+                      id="art-category"
+                      type="text" 
+                      className="admin-input" 
+                      placeholder="Ex: Direito de Família e Sucessões"
+                      value={editingArticle.category}
+                      onChange={(e) => setEditingArticle(prev => ({ ...prev, category: e.target.value }))}
+                      disabled={articleModalMode === 'view'}
+                      required
+                    />
+                  </div>
+                  <div className="form-group flex-1">
+                    <label className="admin-form-label" htmlFor="art-date">Data de Publicação</label>
+                    <input 
+                      id="art-date"
+                      type="text" 
+                      className="admin-input" 
+                      placeholder="Ex: 15 de Junho, 2026"
+                      value={editingArticle.date}
+                      onChange={(e) => setEditingArticle(prev => ({ ...prev, date: e.target.value }))}
+                      disabled={articleModalMode === 'view'}
+                    />
+                  </div>
+                  <div className="form-group flex-1">
+                    <label className="admin-form-label" htmlFor="art-author">Autor / Advogado(a)</label>
+                    <input 
+                      id="art-author"
+                      type="text" 
+                      className="admin-input" 
+                      placeholder="Ex: Dr. Eduardo Ferrari"
+                      value={editingArticle.author}
+                      onChange={(e) => setEditingArticle(prev => ({ ...prev, author: e.target.value }))}
+                      disabled={articleModalMode === 'view'}
+                    />
+                  </div>
+                </div>
+
+                {/* Video URL & Live Player Preview */}
+                <div className="form-group video-input-group">
+                  <label className="admin-form-label" htmlFor="art-video">
+                    🎥 URL do Vídeo (Opcional - YouTube, Vimeo ou link de vídeo)
+                  </label>
+                  <input 
+                    id="art-video"
+                    type="url" 
+                    className="admin-input" 
+                    placeholder="Ex: https://www.youtube.com/watch?v=... ou deixe vazio para artigo sem vídeo"
+                    value={editingArticle.videoUrl}
+                    onChange={(e) => setEditingArticle(prev => ({ ...prev, videoUrl: e.target.value }))}
+                    disabled={articleModalMode === 'view'}
+                  />
+                  
+                  {previewVideoEmbed && (
+                    <div className="video-preview-container animate-fade">
+                      <div className="video-preview-label">📺 Pré-visualização do Reprodutor de Vídeo:</div>
+                      <div className="video-iframe-wrapper">
+                        <iframe 
+                          src={previewVideoEmbed} 
+                          title="Video Preview"
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Short Excerpt */}
+                <div className="form-group">
+                  <label className="admin-form-label" htmlFor="art-desc">
+                    Resumo Curto (Exibido nos cards do site)
+                  </label>
+                  <input 
+                    id="art-desc"
+                    type="text" 
+                    className="admin-input" 
+                    placeholder="Uma breve introdução sobre o artigo para atrair o leitor..."
+                    value={editingArticle.desc}
+                    onChange={(e) => setEditingArticle(prev => ({ ...prev, desc: e.target.value }))}
+                    disabled={articleModalMode === 'view'}
+                  />
+                </div>
+
+                {/* Full Article Text */}
+                <div className="form-group">
+                  <label className="admin-form-label" htmlFor="art-paragraphs">
+                    Texto Integral do Artigo (Separe múltiplos parágrafos com uma linha em branco) *
+                  </label>
+                  <textarea 
+                    id="art-paragraphs"
+                    className="admin-textarea" 
+                    rows="8"
+                    placeholder="Escreva ou cole o artigo completo aqui. Separe cada parágrafo com 2 Enters..."
+                    value={editingArticle.paragraphs}
+                    onChange={(e) => setEditingArticle(prev => ({ ...prev, paragraphs: e.target.value }))}
+                    disabled={articleModalMode === 'view'}
+                    required
+                  ></textarea>
+                </div>
+
+              </div>
+
+              <div className="admin-modal-footer">
+                {articleModalMode === 'view' ? (
+                  <button 
+                    type="button" 
+                    className="admin-btn-primary" 
+                    onClick={() => setArticleModalMode('edit')}
+                  >
+                    ✏️ Ir para Edição
+                  </button>
+                ) : (
+                  <>
+                    <button 
+                      type="button" 
+                      className="admin-btn-secondary" 
+                      onClick={() => setArticleModalOpen(false)}
+                    >
+                      Cancelar
+                    </button>
+                    <button type="submit" className="admin-btn-accent">
+                      💾 Salvar Artigo
                     </button>
                   </>
                 )}

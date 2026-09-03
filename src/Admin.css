@@ -595,6 +595,81 @@
   color: #090a0f;
 }
 
+.admin-article-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.article-icon-thumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  background: rgba(240, 105, 73, 0.12);
+  border: 1px solid rgba(240, 105, 73, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.video-badge {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #fca5a5 !important;
+  font-weight: 600;
+}
+
+.text-badge {
+  background: rgba(59, 130, 246, 0.12) !important;
+  border-color: rgba(59, 130, 246, 0.25) !important;
+  color: #93c5fd !important;
+}
+
+.video-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.video-preview-container {
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(240, 105, 73, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.video-preview-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #f06949;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.video-iframe-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-iframe-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .delete-btn {
   background: rgba(239, 68, 68, 0.1);
   color: #f87171;

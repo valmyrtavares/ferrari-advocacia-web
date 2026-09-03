@@ -167,8 +167,54 @@ export const INITIAL_AREAS = [
   }
 ];
 
+export const INITIAL_ARTICLES = [
+  {
+    id: 'art-1',
+    title: 'Planejamento Sucessório Familiar em 2026: Estratégias e Blindagem',
+    category: 'Direito de Família e Sucessões',
+    date: '15 de Junho, 2026',
+    author: 'Dra. Mariana Zats',
+    desc: 'Entenda os impactos das novas regras jurídicas e como proteger o patrimônio da sua família de forma estratégica e legal.',
+    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    paragraphs: [
+      'O planejamento sucessório tem se consolidado como uma das ferramentas jurídicas mais eficazes para a preservação patrimonial e a prevenção de litígios familiares. Em um cenário econômico dinâmico e diante de constantes atualizações legislativas e tributárias, antecipar a sucessão de bens deixou de ser uma exclusividade de grandes fortunas e passou a ser uma medida indispensável para famílias e grupos empresariais.',
+      'A estruturação adequada envolve instrumentos como a criação de holdings patrimoniais familiares, doações com reserva de usufruto, cláusulas de incomunicabilidade, inalienabilidade e impenhorabilidade, bem como a celebração de acordos de sócios e protocolos de família bem delimitados.',
+      'Além de reduzir substancialmente os custos com processos de inventário judicial ou extrajudicial e tributos como o ITCMD, o planejamento sucessório assegura a continuidade dos negócios familiares sem interrupções operacionais e com a harmonia que todos desejam preservar entre os herdeiros.'
+    ]
+  },
+  {
+    id: 'art-2',
+    title: 'Reestruturação Tributária pós-Reforma: Oportunidades para o Setor Produtivo',
+    category: 'Direito Tributário e Empresarial',
+    date: '08 de Junho, 2026',
+    author: 'Dr. Eduardo Ferrari',
+    desc: 'Uma análise detalhada sobre a transição de tributos e as oportunidades legais de elisão fiscal para o setor industrial brasileiro.',
+    videoUrl: '', // Sem vídeo (leitura em texto)
+    paragraphs: [
+      'Com o avanço e a regulamentação gradual das novas diretrizes da Reforma Tributária sobre o consumo e a renda, as empresas brasileiras são desafiadas a repensar suas cadeias de suprimentos, modelos contratuais e regimes de apuração fiscal.',
+      'A unificação e simplificação de tributos trazem oportunidades claras de elisão fiscal estratégica, mas exigem uma auditoria minuciosa dos contratos em vigor e das margens operacionais de cada segmento industrial e comercial.',
+      'Nossa equipe societária e tributária tem assessorado clientes de diversos setores na modelagem de cenários preditivos, permitindo a tomada de decisões ágeis para a manutenção da competitividade e conformidade fiscal.'
+    ]
+  },
+  {
+    id: 'art-3',
+    title: 'LGPD e a Responsabilidade dos Sócios e Administradores',
+    category: 'Compliance Digital',
+    date: '28 de Maio, 2026',
+    author: 'Dra. Beatriz Albuquerque',
+    desc: 'Como as recentes decisões judiciais responsabilizam administradores pela segurança da informação e proteção de dados nas empresas.',
+    videoUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+    paragraphs: [
+      'A jurisprudência dos tribunais brasileiros tem demonstrado um rigor cada vez maior quanto à responsabilização direta de diretores e administradores por incidentes de segurança da informação e vazamento de dados pessoais.',
+      'Não basta mais ter uma política de privacidade genérica no site; a Lei Geral de Proteção de Dados (LGPD) exige governança ativa, nomeação de encarregado de dados (DPO), relatórios de impacto à proteção de dados e planos de resposta a incidentes comprovadamente operacionais.',
+      'A implementação de um programa robusto de compliance digital previne sanções severas da Autoridade Nacional de Proteção de Dados (ANPD), além de resguardar o patrimônio pessoal dos executivos e a reputação da companhia no mercado.'
+    ]
+  }
+];
+
 const STORAGE_KEY_LAWYERS = 'ef_cms_lawyers_v1';
 const STORAGE_KEY_AREAS = 'ef_cms_areas_v1';
+const STORAGE_KEY_ARTICLES = 'ef_cms_articles_v1';
 
 export function getStoredLawyers() {
   try {
@@ -216,8 +262,55 @@ export function saveStoredAreas(areas) {
   }
 }
 
+export function getStoredArticles() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_ARTICLES);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(INITIAL_ARTICLES));
+      return INITIAL_ARTICLES;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_ARTICLES;
+  } catch {
+    return INITIAL_ARTICLES;
+  }
+}
+
+export function saveStoredArticles(articles) {
+  try {
+    localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(articles));
+    window.dispatchEvent(new Event('cms_data_updated'));
+  } catch (e) {
+    console.error('Error saving articles to localStorage:', e);
+  }
+}
+
 export function resetCmsDefaults() {
   localStorage.setItem(STORAGE_KEY_LAWYERS, JSON.stringify(INITIAL_LAWYERS));
   localStorage.setItem(STORAGE_KEY_AREAS, JSON.stringify(INITIAL_AREAS));
+  localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(INITIAL_ARTICLES));
   window.dispatchEvent(new Event('cms_data_updated'));
+}
+
+export function getEmbedVideoUrl(url) {
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+
+  // YouTube match: regular watch, short youtu.be, or embed
+  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = trimmed.match(youtubeRegex);
+  if (match && match[1]) {
+    return `https://www.youtube-nocookie.com/embed/${match[1]}`;
+  }
+
+  // Vimeo match
+  const vimeoRegex = /vimeo\.com\/(?:video\/)?([0-9]+)/;
+  const vimeoMatch = trimmed.match(vimeoRegex);
+  if (vimeoMatch && vimeoMatch[1]) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+
+  // If already an embed or standard https link
+  return trimmed;
 }
