@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import lawyer1 from '../assets/images/lawyer1.png';
 import lawyer2 from '../assets/images/lawyer2.png';
 import lawyer3 from '../assets/images/lawyer3.png';
-import zatsLogo from '../assets/Zats.jpeg';
 
 export default function Home() {
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'escritorio' | 'noticias' | 'contato'
+  const [officeTab, setOfficeTab] = useState('areas'); // 'equipe' | 'areas'
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeServiceId, setActiveServiceId] = useState('quem-somos');
+  const [activeLawyerId, setActiveLawyerId] = useState('eduardo');
   const [lang, setLang] = useState('pt'); // 'pt' | 'en'
 
   const toggleLanguage = () => {
@@ -18,22 +19,117 @@ export default function Home() {
     pt: {
       nav: {
         home: 'Home',
-        servicos: 'Serviços',
+        escritorio: 'O Escritório',
         noticias: 'Notícias & Artigos',
         contato: 'Contato'
       },
       hero: {
         tagline: 'ADVOGADOS ASSOCIADOS'
       },
-      servicos: {
-        heading: 'Nossos Serviços',
-        items: [
+      escritorio: {
+        equipeTab: 'A Equipe',
+        areasTab: 'Áreas de Atuação',
+        lawyers: [
+          {
+            id: 'eduardo',
+            label: 'DR. EDUARDO FERRARI',
+            name: 'Dr. Eduardo Ferrari',
+            role: 'Sócio Fundador | OAB/SP 245.890',
+            specialty: 'Direito Empresarial, Fusões e Aquisições (M&A) e Contratos',
+            image: lawyer1,
+            paragraphs: [
+              'Graduado em Direito pela Universidade de São Paulo (USP) e Mestre em Direito Comercial pela Pontifícia Universidade Católica de São Paulo (PUC-SP).',
+              'Com mais de 20 anos de experiência na advocacia corporativa de alta performance, lidera a condução de reestruturações societárias, governança corporativa, planejamento estratégico e assessoria jurídica em negociações complexas para empresas nacionais e multinacionais.',
+              'Membro efetivo de comissões especializadas em Direito Empresarial e autor de diversos artigos sobre segurança jurídica e governança nos negócios.'
+            ],
+            credentials: [
+              'Mestre em Direito Comercial - PUC-SP',
+              'Especialista em Direito Societário e M&A - FGV Direito SP',
+              'Graduado em Direito - Universidade de São Paulo (USP)'
+            ]
+          },
+          {
+            id: 'mariana',
+            label: 'DRA. MARIANA ZATS',
+            name: 'Dra. Mariana Zats',
+            role: 'Sócia Coordenadora | OAB/SP 289.412',
+            specialty: 'Direito de Família, Planejamento Sucessório e Patrimonial',
+            image: lawyer2,
+            paragraphs: [
+              'Especialista em Direito das Famílias e Sucessões pela Escola de Direito da Fundação Getulio Vargas (FGV-SP).',
+              'Possui sólida atuação na condução e mediação de inventários de grande porte, divórcios com partilha complexa de bens, governança familiar e elaboração de planos sucessórios estruturados para proteção e longevidade do patrimônio.',
+              'Destaca-se pelo atendimento humanizado, sigiloso e de alto rigor técnico em temas de alta sensibilidade pessoal e patrimonial.'
+            ],
+            credentials: [
+              'Especialista em Família e Sucessões - FGV Direito SP',
+              'Membro do Instituto Brasileiro de Direito de Família (IBDFAM)',
+              'Graduada em Direito - Universidade Presbiteriana Mackenzie'
+            ]
+          },
+          {
+            id: 'carlos',
+            label: 'DR. CARLOS SIMONACCI',
+            name: 'Dr. Carlos Simonacci',
+            role: 'Advogado Associado Sênior | OAB/SP 312.754',
+            specialty: 'Direito Imobiliário, Regularização Fundiária e Urbanístico',
+            image: lawyer3,
+            paragraphs: [
+              'Pós-graduado em Direito Imobiliário e Notarial pela Escola Paulista de Direito (EPD).',
+              'Consultor especializado em due diligence para aquisições de ativos imobiliários, estruturação de empreendimentos comerciais e residenciais, regularizações fundiárias, incorporações e gestão de contratos de locação atípicos (Built to Suit).',
+              'Atua fortemente na mitigação de riscos contratuais e na viabilização jurídica de investimentos no setor imobiliário.'
+            ],
+            credentials: [
+              'Pós-Graduado em Direito Imobiliário - EPD',
+              'Especialista em Contratos Imobiliários e Negócios - Secovi-SP',
+              'Graduado em Direito - Pontifícia Universidade Católica (PUC-SP)'
+            ]
+          },
+          {
+            id: 'beatriz',
+            label: 'DRA. BEATRIZ ALBUQUERQUE',
+            name: 'Dra. Beatriz Albuquerque',
+            role: 'Advogada Associada | OAB/SP 365.189',
+            specialty: 'Direito Trabalhista Corporativo e Compliance',
+            image: null,
+            initials: 'BA',
+            paragraphs: [
+              'Especialista em Direito e Processo do Trabalho pela Faculdade de Direito da Universidade de São Paulo (USP).',
+              'Com ampla vivência em consultoria preventiva para departamentos jurídicos e de recursos humanos, conduz auditorias de conformidade trabalhista (compliance), negociações sindicais e defesas estratégicas patronais perante a Justiça do Trabalho.',
+              'Foco direcionado na redução sustentável de passivos trabalhistas e modernização de políticas internas corporativas.'
+            ],
+            credentials: [
+              'Especialista em Direito do Trabalho - USP',
+              'Certificação em Compliance Trabalhista - Legal, Ethics & Compliance (LEC)',
+              'Graduada em Direito - Pontifícia Universidade Católica (PUC-SP)'
+            ]
+          },
+          {
+            id: 'rodrigo',
+            label: 'DR. RODRIGO MEIRELLES',
+            name: 'Dr. Rodrigo Meirelles',
+            role: 'Advogado Associado | OAB/SP 398.621',
+            specialty: 'Direito do Consumidor e Responsabilidade Civil',
+            image: null,
+            initials: 'RM',
+            paragraphs: [
+              'Pós-graduado em Direito Civil e Processual Civil pela Pontifícia Universidade Católica de São Paulo (PUC-SP).',
+              'Dedicado ao contencioso cível estratégico e à resolução de disputas complexas nas relações de consumo, elaborando pareceres de risco, atuando perante órgãos de fiscalização e tribunais estaduais e superiores.',
+              'Experiência destacada na defesa de empresas em litígios de responsabilidade civil e adequação a normas consumeristas.'
+            ],
+            credentials: [
+              'Pós-Graduado em Processo Civil - PUC-SP',
+              'Especialista em Responsabilidade Civil - Escola Paulista da Magistratura (EPM)',
+              'Graduado em Direito - Universidade Presbiteriana Mackenzie'
+            ]
+          }
+        ],
+        areas: [
           {
             id: 'quem-somos',
             label: 'QUEM SOMOS',
             title: 'Quem Somos',
             paragraphs: [
-              'Zatz & Simonacci Advogados Associados é um escritório boutique, especializado em oferecer atendimento jurídico personalizado e de excelência.',
+              'Eduardo Ferrari Advogados Associados é um escritório boutique, especializado em oferecer atendimento jurídico personalizado e de excelência.',
               'Atuamos nas áreas cível, família, sucessões, imobiliária, empresarial e trabalhista, com foco na prevenção e solução de conflitos através de estratégias sob medida para cada cliente.',
               'Nosso objetivo precípuo é o sucesso integral de nossos clientes. Para isso, não medimos esforços para alcançar resultados excepcionais em cada demanda. Combinamos proximidade, entendimento profundo das necessidades, agilidade e expertise técnica para garantir soluções jurídicas de alto impacto, sempre com acompanhamento dedicado em todas as etapas do processo.'
             ]
@@ -123,7 +219,7 @@ export default function Home() {
         subtitle: 'Agende uma consulta presencial ou remota com nossa equipe de especialistas jurídicos.',
         address: 'Al. Tangará, 80, Sala 1, The Point Office, Cotia-SP, CEP 06711-020',
         phone: '+55 (11) 98899-4871',
-        email: 'contato@zatzsimonacci.adv.br',
+        email: 'contato@zsaa.com.br',
         hours: 'Segunda a Sexta - 09:00 às 18:00',
         labels: {
           name: 'Nome Completo',
@@ -133,28 +229,123 @@ export default function Home() {
           submit: 'Enviar via WhatsApp'
         }
       },
-      footer: 'Zatz Simonacci Advogados Associados.',
+      footer: 'Eduardo Ferrari Advogados Associados.',
       langBtn: 'English'
     },
     en: {
       nav: {
         home: 'Home',
-        servicos: 'Services',
+        escritorio: 'The Firm',
         noticias: 'News & Articles',
         contato: 'Contact'
       },
       hero: {
         tagline: 'ATTORNEYS AT LAW'
       },
-      servicos: {
-        heading: 'Our Services',
-        items: [
+      escritorio: {
+        equipeTab: 'The Team',
+        areasTab: 'Practice Areas',
+        lawyers: [
+          {
+            id: 'eduardo',
+            label: 'DR. EDUARDO FERRARI',
+            name: 'Dr. Eduardo Ferrari',
+            role: 'Founding Partner | Bar No. 245.890',
+            specialty: 'Corporate Law, Mergers & Acquisitions (M&A) and Contracts',
+            image: lawyer1,
+            paragraphs: [
+              'Graduated in Law from the University of São Paulo (USP) and Master in Commercial Law from the Pontifical Catholic University of São Paulo (PUC-SP).',
+              'With over 20 years of experience in high-performance corporate legal practice, he leads corporate restructuring, corporate governance, strategic planning, and complex negotiations for domestic and international corporations.',
+              'Active member of specialized Corporate Law commissions and author of articles on legal security and business governance.'
+            ],
+            credentials: [
+              'Master in Commercial Law - PUC-SP',
+              'Specialist in Corporate Law and M&A - FGV Law SP',
+              'Bachelor of Laws - University of São Paulo (USP)'
+            ]
+          },
+          {
+            id: 'mariana',
+            label: 'DRA. MARIANA ZATS',
+            name: 'Dra. Mariana Zats',
+            role: 'Senior Partner | Bar No. 289.412',
+            specialty: 'Family Law, Estate Planning & Wealth Protection',
+            image: lawyer2,
+            paragraphs: [
+              'Specialist in Family and Probate Law from Getulio Vargas Foundation Law School (FGV-SP).',
+              'Solid expertise in high-net-worth probate proceedings, complex asset division divorces, family governance, and structured estate planning focused on asset protection and family harmony.',
+              'Known for personalized, discreet, and technically rigorous counsel in sensitive personal and wealth matters.'
+            ],
+            credentials: [
+              'Specialist in Family & Probate Law - FGV Law SP',
+              'Member of the Brazilian Family Law Institute (IBDFAM)',
+              'Bachelor of Laws - Mackenzie Presbyterian University'
+            ]
+          },
+          {
+            id: 'carlos',
+            label: 'DR. CARLOS SIMONACCI',
+            name: 'Dr. Carlos Simonacci',
+            role: 'Senior Associate Attorney | Bar No. 312.754',
+            specialty: 'Real Estate Law, Land Regularization & Urban Planning',
+            image: lawyer3,
+            paragraphs: [
+              'Postgraduate in Real Estate and Notarial Law from Escola Paulista de Direito (EPD).',
+              'Specialized consultant in due diligence for real estate acquisitions, structuring commercial and residential developments, land regularization, and atypical lease contracts (Built to Suit).',
+              'Strong track record in mitigating contractual risks and enabling high-yield real estate investments.'
+            ],
+            credentials: [
+              'Postgraduate in Real Estate Law - EPD',
+              'Specialist in Real Estate Contracts - Secovi-SP',
+              'Bachelor of Laws - Pontifical Catholic University (PUC-SP)'
+            ]
+          },
+          {
+            id: 'beatriz',
+            label: 'DRA. BEATRIZ ALBUQUERQUE',
+            name: 'Dra. Beatriz Albuquerque',
+            role: 'Associate Attorney | Bar No. 365.189',
+            specialty: 'Corporate Labor Law & Compliance',
+            image: null,
+            initials: 'BA',
+            paragraphs: [
+              'Specialist in Labor and Employment Law from the University of São Paulo (USP).',
+              'Extensive experience in preventive advisory for corporate legal and HR departments, conducting labor compliance audits, collective bargaining, and strategic employer defense.',
+              'Focused on sustainable reduction of labor liabilities and modernization of corporate internal policies.'
+            ],
+            credentials: [
+              'Specialist in Labor Law - USP',
+              'Certified Labor Compliance Specialist - LEC',
+              'Bachelor of Laws - Pontifical Catholic University (PUC-SP)'
+            ]
+          },
+          {
+            id: 'rodrigo',
+            label: 'DR. RODRIGO MEIRELLES',
+            name: 'Dr. Rodrigo Meirelles',
+            role: 'Associate Attorney | Bar No. 398.621',
+            specialty: 'Consumer Law & Civil Liability',
+            image: null,
+            initials: 'RM',
+            paragraphs: [
+              'Postgraduate in Civil Law and Civil Procedure from Pontifical Catholic University of São Paulo (PUC-SP).',
+              'Dedicated to strategic civil litigation and resolution of complex consumer disputes, delivering legal risk assessments and defending corporate clients before consumer protection bodies and superior courts.',
+              'Solid experience in civil liability defense and corporate regulatory alignment.'
+            ],
+            credentials: [
+              'Postgraduate in Civil Procedure - PUC-SP',
+              'Specialist in Civil Liability - Paulista Judiciary School (EPM)',
+              'Bachelor of Laws - Mackenzie Presbyterian University'
+            ]
+          }
+        ],
+        areas: [
           {
             id: 'quem-somos',
             label: 'ABOUT US',
             title: 'About Us',
             paragraphs: [
-              'Zatz & Simonacci Advogados Associados is a boutique law firm, specializing in delivering personalized, high-excellence legal services.',
+              'Eduardo Ferrari Attorneys at Law is a boutique law firm, specializing in delivering personalized, high-excellence legal services.',
               'We operate in civil, family, probate, real estate, corporate, and labor law, focusing on conflict prevention and resolution through tailored strategies for each client.',
               'Our primary goal is the integral success of our clients. To achieve this, we spare no effort to deliver exceptional results in every demand, combining proximity, deep understanding of needs, agility, and technical expertise to ensure high-impact legal solutions, always with dedicated follow-up at every stage.'
             ]
@@ -244,7 +435,7 @@ export default function Home() {
         subtitle: 'Schedule an in-person or remote consultation with our team of legal experts.',
         address: 'Al. Tangará, 80, Suite 1, The Point Office, Cotia-SP, Brazil, CEP 06711-020',
         phone: '+55 (11) 98899-4871',
-        email: 'contato@zatzsimonacci.adv.br',
+        email: 'contato@zsaa.com.br',
         hours: 'Monday to Friday - 09:00 AM to 06:00 PM',
         labels: {
           name: 'Full Name',
@@ -254,7 +445,7 @@ export default function Home() {
           submit: 'Send via WhatsApp'
         }
       },
-      footer: 'Zatz Simonacci Attorneys at Law.',
+      footer: 'Eduardo Ferrari Attorneys at Law.',
       langBtn: 'Português'
     }
   };
@@ -278,7 +469,7 @@ export default function Home() {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const phoneNumber = "5511988994871";
-    const text = `*${lang === 'pt' ? 'Novo Contato via Site Zatz & Simonacci' : 'New Contact via Zatz & Simonacci Website'}*\n\n` +
+    const text = `*${lang === 'pt' ? 'Novo Contato via Site Eduardo Ferrari Advogados' : 'New Contact via Eduardo Ferrari Law Website'}*\n\n` +
                  `👤 *${t.contato.labels.name}:* ${formData.name}\n` +
                  `✉️ *${t.contato.labels.email}:* ${formData.email}\n` +
                  `📞 *${t.contato.labels.phone}:* ${formData.phone}\n\n` +
@@ -289,10 +480,16 @@ export default function Home() {
     window.open(whatsappUrl, '_blank');
   };
 
-  const navigateTo = (page) => {
+  const navigateTo = (page, subTab = null) => {
     setCurrentPage(page);
+    if (subTab) {
+      setOfficeTab(subTab);
+    }
     setMenuOpen(false);
   };
+
+  const currentSelectedLawyer = t.escritorio.lawyers.find(l => l.id === activeLawyerId) || t.escritorio.lawyers[0];
+  const currentSelectedArea = t.escritorio.areas.find(s => s.id === activeServiceId) || t.escritorio.areas[0];
 
   return (
     <div className="home-container">
@@ -302,15 +499,61 @@ export default function Home() {
       {/* Top Header Section */}
       <header className="home-header">
         <div className="logo-container" onClick={() => navigateTo('home')} style={{ cursor: 'pointer' }}>
-          <img src={zatsLogo} alt="Zatz & Simonacci Logo" className="site-logo-img" />
+          <div className="brand-logo-header">
+            <div className="brand-logo-monogram">EF</div>
+            <div className="brand-logo-text">
+              <span className="brand-logo-name">EDUARDO FERRARI</span>
+              <span className="brand-logo-sub">ADVOGADOS ASSOCIADOS</span>
+            </div>
+          </div>
         </div>
 
         {/* Desktop Inline Navigation */}
         <nav className="desktop-nav">
-          <button className={`nav-btn ${currentPage === 'home' ? 'active' : ''}`} onClick={() => navigateTo('home')}>{t.nav.home}</button>
-          <button className={`nav-btn ${currentPage === 'servicos' ? 'active' : ''}`} onClick={() => navigateTo('servicos')}>{t.nav.servicos}</button>
-          <button className={`nav-btn ${currentPage === 'noticias' ? 'active' : ''}`} onClick={() => navigateTo('noticias')}>{t.nav.noticias}</button>
-          <button className={`nav-btn ${currentPage === 'contato' ? 'active' : ''}`} onClick={() => navigateTo('contato')}>{t.nav.contato}</button>
+          <button 
+            className={`nav-btn ${currentPage === 'home' ? 'active' : ''}`} 
+            onClick={() => navigateTo('home')}
+          >
+            {t.nav.home}
+          </button>
+          
+          {/* O Escritório with Dropdown Submenu */}
+          <div className="nav-dropdown-item">
+            <button 
+              className={`nav-btn ${currentPage === 'escritorio' ? 'active' : ''}`} 
+              onClick={() => navigateTo('escritorio')}
+            >
+              {t.nav.escritorio}
+              <span className="dropdown-caret">▾</span>
+            </button>
+            <div className="nav-dropdown-menu">
+              <button 
+                className={`dropdown-sublink ${currentPage === 'escritorio' && officeTab === 'equipe' ? 'active' : ''}`}
+                onClick={(e) => { e.stopPropagation(); navigateTo('escritorio', 'equipe'); }}
+              >
+                {t.escritorio.equipeTab}
+              </button>
+              <button 
+                className={`dropdown-sublink ${currentPage === 'escritorio' && officeTab === 'areas' ? 'active' : ''}`}
+                onClick={(e) => { e.stopPropagation(); navigateTo('escritorio', 'areas'); }}
+              >
+                {t.escritorio.areasTab}
+              </button>
+            </div>
+          </div>
+
+          <button 
+            className={`nav-btn ${currentPage === 'noticias' ? 'active' : ''}`} 
+            onClick={() => navigateTo('noticias')}
+          >
+            {t.nav.noticias}
+          </button>
+          <button 
+            className={`nav-btn ${currentPage === 'contato' ? 'active' : ''}`} 
+            onClick={() => navigateTo('contato')}
+          >
+            {t.nav.contato}
+          </button>
         </nav>
 
         {/* Hamburger Menu Toggle Button */}
@@ -334,12 +577,30 @@ export default function Home() {
           >
             {t.nav.home}
           </button>
-          <button 
-            className={`drawer-link ${currentPage === 'servicos' ? 'active' : ''}`}
-            onClick={() => navigateTo('servicos')}
-          >
-            {t.nav.servicos}
-          </button>
+          
+          <div className="drawer-group">
+            <button 
+              className={`drawer-link ${currentPage === 'escritorio' ? 'active' : ''}`}
+              onClick={() => navigateTo('escritorio')}
+            >
+              {t.nav.escritorio}
+            </button>
+            <div className="drawer-sublinks-container">
+              <button 
+                className={`drawer-subitem ${currentPage === 'escritorio' && officeTab === 'equipe' ? 'active' : ''}`}
+                onClick={() => navigateTo('escritorio', 'equipe')}
+              >
+                ↳ {t.escritorio.equipeTab}
+              </button>
+              <button 
+                className={`drawer-subitem ${currentPage === 'escritorio' && officeTab === 'areas' ? 'active' : ''}`}
+                onClick={() => navigateTo('escritorio', 'areas')}
+              >
+                ↳ {t.escritorio.areasTab}
+              </button>
+            </div>
+          </div>
+
           <button 
             className={`drawer-link ${currentPage === 'noticias' ? 'active' : ''}`}
             onClick={() => navigateTo('noticias')}
@@ -360,14 +621,13 @@ export default function Home() {
 
       {/* Dynamic Screen Content Wrapper */}
       <div className="app-screen-content">
-        {/* Screen: Home Hero (ZATS SIMONACCI) */}
+        {/* Screen: Home Hero (EDUARDO FERRARI) */}
         {currentPage === 'home' && (
           <section className="screen-section home-hero-view">
             <div className="brand-block">
               <h1 className="brand-subtitle">
-                <span className="brand-row">ZATS</span>
-                <span className="brand-row ampersand-row">&amp;</span>
-                <span className="brand-row">SIMONACCI</span>
+                <span className="brand-row">EDUARDO</span>
+                <span className="brand-row">FERRARI</span>
               </h1>
               <div className="brand-tagline">{t.hero.tagline}</div>
             </div>
@@ -377,45 +637,144 @@ export default function Home() {
           </section>
         )}
 
-        {/* Screen: Serviços */}
-        {currentPage === 'servicos' && (
+        {/* Screen: O Escritório (Sub-tabs: A Equipe | Áreas de Atuação) */}
+        {currentPage === 'escritorio' && (
           <section className="screen-section scrollable-view">
             <div className="section-inner-container">
-              <h2 className="section-heading">{t.servicos.heading}</h2>
-              <div className="section-divider"></div>
-
-              <div className="services-layout">
-                {/* Left Sidebar Menu */}
-                <div className="services-sidebar">
-                  {t.servicos.items.map((service) => (
-                    <button
-                      key={service.id}
-                      className={`service-tab-btn ${activeServiceId === service.id ? 'active' : ''}`}
-                      onClick={() => setActiveServiceId(service.id)}
-                    >
-                      <span className="tab-indicator"></span>
-                      {service.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Right Content Panel */}
-                <div className="services-content-card animate-fade">
-                  {t.servicos.items.find(s => s.id === activeServiceId) && (
-                    <div className="service-details">
-                      <h3 className="service-detail-title">
-                        {t.servicos.items.find(s => s.id === activeServiceId).title}
-                      </h3>
-                      <div className="service-detail-divider"></div>
-                      <div className="service-paragraphs">
-                        {t.servicos.items.find(s => s.id === activeServiceId).paragraphs.map((p, idx) => (
-                          <p key={idx} className="service-paragraph">{p}</p>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              
+              {/* Top Submenu Switcher Tabs (In place of "Nossos Serviços" title) */}
+              <div className="office-tab-switch-header">
+                <div className="office-tab-switch-group">
+                  <button
+                    className={`office-switcher-btn ${officeTab === 'equipe' ? 'active' : ''}`}
+                    onClick={() => setOfficeTab('equipe')}
+                  >
+                    <span className="switch-bullet"></span>
+                    <span>{t.escritorio.equipeTab}</span>
+                  </button>
+                  <button
+                    className={`office-switcher-btn ${officeTab === 'areas' ? 'active' : ''}`}
+                    onClick={() => setOfficeTab('areas')}
+                  >
+                    <span className="switch-bullet"></span>
+                    <span>{t.escritorio.areasTab}</span>
+                  </button>
                 </div>
               </div>
+
+              {/* View 1: A Equipe */}
+              {officeTab === 'equipe' && (
+                <div className="services-layout animate-fade" key="equipe-view">
+                  {/* Left Sidebar: Lawyers Buttons */}
+                  <div className="services-sidebar">
+                    {t.escritorio.lawyers.map((lawyer) => (
+                      <button
+                        key={lawyer.id}
+                        className={`service-tab-btn ${activeLawyerId === lawyer.id ? 'active' : ''}`}
+                        onClick={() => setActiveLawyerId(lawyer.id)}
+                      >
+                        <span className="tab-indicator"></span>
+                        {lawyer.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Right Content Panel: Lawyer Profile */}
+                  <div className="services-content-card">
+                    {currentSelectedLawyer && (
+                      <div className="lawyer-profile-detail animate-fade" key={currentSelectedLawyer.id}>
+                        <div className="lawyer-detail-header">
+                          <div className="lawyer-detail-avatar-wrapper">
+                            {currentSelectedLawyer.image ? (
+                              <img 
+                                src={currentSelectedLawyer.image} 
+                                alt={currentSelectedLawyer.name} 
+                                className="lawyer-detail-avatar-img"
+                              />
+                            ) : (
+                              <div className="lawyer-detail-avatar-placeholder">
+                                {currentSelectedLawyer.initials || 'EF'}
+                              </div>
+                            )}
+                          </div>
+                          <div className="lawyer-detail-header-info">
+                            <h3 className="service-detail-title lawyer-detail-name">
+                              {currentSelectedLawyer.name}
+                            </h3>
+                            <div className="lawyer-detail-role-badge">
+                              {currentSelectedLawyer.role}
+                            </div>
+                            <div className="lawyer-detail-specialty">
+                              {currentSelectedLawyer.specialty}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="service-detail-divider"></div>
+
+                        <div className="service-paragraphs">
+                          {currentSelectedLawyer.paragraphs.map((p, idx) => (
+                            <p key={idx} className="service-paragraph">{p}</p>
+                          ))}
+                        </div>
+
+                        {currentSelectedLawyer.credentials && currentSelectedLawyer.credentials.length > 0 && (
+                          <div className="lawyer-credentials-box">
+                            <h4 className="lawyer-credentials-title">
+                              {lang === 'pt' ? 'Formação & Qualificações' : 'Education & Credentials'}
+                            </h4>
+                            <ul className="lawyer-credentials-list">
+                              {currentSelectedLawyer.credentials.map((cred, idx) => (
+                                <li key={idx} className="lawyer-credential-item">
+                                  <span className="credential-bullet">◆</span>
+                                  <span>{cred}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* View 2: Áreas de Atuação */}
+              {officeTab === 'areas' && (
+                <div className="services-layout animate-fade" key="areas-view">
+                  {/* Left Sidebar Menu */}
+                  <div className="services-sidebar">
+                    {t.escritorio.areas.map((service) => (
+                      <button
+                        key={service.id}
+                        className={`service-tab-btn ${activeServiceId === service.id ? 'active' : ''}`}
+                        onClick={() => setActiveServiceId(service.id)}
+                      >
+                        <span className="tab-indicator"></span>
+                        {service.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Right Content Panel */}
+                  <div className="services-content-card">
+                    {currentSelectedArea && (
+                      <div className="service-details animate-fade" key={currentSelectedArea.id}>
+                        <h3 className="service-detail-title">
+                          {currentSelectedArea.title}
+                        </h3>
+                        <div className="service-detail-divider"></div>
+                        <div className="service-paragraphs">
+                          {currentSelectedArea.paragraphs.map((p, idx) => (
+                            <p key={idx} className="service-paragraph">{p}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
             </div>
             <footer className="footer-bar inner-footer">
               <span>&copy; {new Date().getFullYear()} {t.footer}</span>
@@ -457,7 +816,7 @@ export default function Home() {
               <div className="section-divider"></div>
               <div className="contact-grid">
                 <div className="contact-info animate-fade">
-                  <h3 className="contact-info-title">ZATZ & SIMONACCI ADVOGADOS ASSOCIADOS</h3>
+                  <h3 className="contact-info-title">EDUARDO FERRARI ADVOGADOS ASSOCIADOS</h3>
                   <p className="contact-info-text">{t.contato.subtitle}</p>
                   <div className="contact-details">
                     <div className="detail-item">
@@ -519,3 +878,4 @@ export default function Home() {
     </div>
   );
 }
+
