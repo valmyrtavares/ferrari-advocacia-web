@@ -1,15 +1,29 @@
-import React, { useState } from 'react';
-import lawyer1 from '../assets/images/lawyer1.png';
-import lawyer2 from '../assets/images/lawyer2.png';
-import lawyer3 from '../assets/images/lawyer3.png';
+import React, { useState, useEffect } from 'react';
+import { getStoredLawyers, getStoredAreas } from '../data/cmsData';
 
-export default function Home() {
+export default function Home({ onNavigateToAdmin }) {
   const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'escritorio' | 'noticias' | 'contato'
   const [officeTab, setOfficeTab] = useState('areas'); // 'equipe' | 'areas'
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeServiceId, setActiveServiceId] = useState('quem-somos');
   const [activeLawyerId, setActiveLawyerId] = useState('eduardo');
   const [lang, setLang] = useState('pt'); // 'pt' | 'en'
+
+  // Dynamic CMS Data from LocalStorage
+  const [cmsLawyers, setCmsLawyers] = useState(getStoredLawyers);
+  const [cmsAreas, setCmsAreas] = useState(getStoredAreas);
+
+  useEffect(() => {
+    const handleCmsUpdate = () => {
+      const updatedLawyers = getStoredLawyers();
+      const updatedAreas = getStoredAreas();
+      setCmsLawyers(updatedLawyers);
+      setCmsAreas(updatedAreas);
+    };
+
+    window.addEventListener('cms_data_updated', handleCmsUpdate);
+    return () => window.removeEventListener('cms_data_updated', handleCmsUpdate);
+  }, []);
 
   const toggleLanguage = () => {
     setLang((prev) => (prev === 'pt' ? 'en' : 'pt'));
@@ -29,166 +43,8 @@ export default function Home() {
       escritorio: {
         equipeTab: 'A Equipe',
         areasTab: 'Áreas de Atuação',
-        lawyers: [
-          {
-            id: 'eduardo',
-            label: 'DR. EDUARDO FERRARI',
-            name: 'Dr. Eduardo Ferrari',
-            role: 'Sócio Fundador | OAB/SP 245.890',
-            specialty: 'Direito Empresarial, Fusões e Aquisições (M&A) e Contratos',
-            image: lawyer1,
-            paragraphs: [
-              'Graduado em Direito pela Universidade de São Paulo (USP) e Mestre em Direito Comercial pela Pontifícia Universidade Católica de São Paulo (PUC-SP).',
-              'Com mais de 20 anos de experiência na advocacia corporativa de alta performance, lidera a condução de reestruturações societárias, governança corporativa, planejamento estratégico e assessoria jurídica em negociações complexas para empresas nacionais e multinacionais.',
-              'Membro efetivo de comissões especializadas em Direito Empresarial e autor de diversos artigos sobre segurança jurídica e governança nos negócios.'
-            ],
-            credentials: [
-              'Mestre em Direito Comercial - PUC-SP',
-              'Especialista em Direito Societário e M&A - FGV Direito SP',
-              'Graduado em Direito - Universidade de São Paulo (USP)'
-            ]
-          },
-          {
-            id: 'mariana',
-            label: 'DRA. MARIANA ZATS',
-            name: 'Dra. Mariana Zats',
-            role: 'Sócia Coordenadora | OAB/SP 289.412',
-            specialty: 'Direito de Família, Planejamento Sucessório e Patrimonial',
-            image: lawyer2,
-            paragraphs: [
-              'Especialista em Direito das Famílias e Sucessões pela Escola de Direito da Fundação Getulio Vargas (FGV-SP).',
-              'Possui sólida atuação na condução e mediação de inventários de grande porte, divórcios com partilha complexa de bens, governança familiar e elaboração de planos sucessórios estruturados para proteção e longevidade do patrimônio.',
-              'Destaca-se pelo atendimento humanizado, sigiloso e de alto rigor técnico em temas de alta sensibilidade pessoal e patrimonial.'
-            ],
-            credentials: [
-              'Especialista em Família e Sucessões - FGV Direito SP',
-              'Membro do Instituto Brasileiro de Direito de Família (IBDFAM)',
-              'Graduada em Direito - Universidade Presbiteriana Mackenzie'
-            ]
-          },
-          {
-            id: 'carlos',
-            label: 'DR. CARLOS SIMONACCI',
-            name: 'Dr. Carlos Simonacci',
-            role: 'Advogado Associado Sênior | OAB/SP 312.754',
-            specialty: 'Direito Imobiliário, Regularização Fundiária e Urbanístico',
-            image: lawyer3,
-            paragraphs: [
-              'Pós-graduado em Direito Imobiliário e Notarial pela Escola Paulista de Direito (EPD).',
-              'Consultor especializado em due diligence para aquisições de ativos imobiliários, estruturação de empreendimentos comerciais e residenciais, regularizações fundiárias, incorporações e gestão de contratos de locação atípicos (Built to Suit).',
-              'Atua fortemente na mitigação de riscos contratuais e na viabilização jurídica de investimentos no setor imobiliário.'
-            ],
-            credentials: [
-              'Pós-Graduado em Direito Imobiliário - EPD',
-              'Especialista em Contratos Imobiliários e Negócios - Secovi-SP',
-              'Graduado em Direito - Pontifícia Universidade Católica (PUC-SP)'
-            ]
-          },
-          {
-            id: 'beatriz',
-            label: 'DRA. BEATRIZ ALBUQUERQUE',
-            name: 'Dra. Beatriz Albuquerque',
-            role: 'Advogada Associada | OAB/SP 365.189',
-            specialty: 'Direito Trabalhista Corporativo e Compliance',
-            image: null,
-            initials: 'BA',
-            paragraphs: [
-              'Especialista em Direito e Processo do Trabalho pela Faculdade de Direito da Universidade de São Paulo (USP).',
-              'Com ampla vivência em consultoria preventiva para departamentos jurídicos e de recursos humanos, conduz auditorias de conformidade trabalhista (compliance), negociações sindicais e defesas estratégicas patronais perante a Justiça do Trabalho.',
-              'Foco direcionado na redução sustentável de passivos trabalhistas e modernização de políticas internas corporativas.'
-            ],
-            credentials: [
-              'Especialista em Direito do Trabalho - USP',
-              'Certificação em Compliance Trabalhista - Legal, Ethics & Compliance (LEC)',
-              'Graduada em Direito - Pontifícia Universidade Católica (PUC-SP)'
-            ]
-          },
-          {
-            id: 'rodrigo',
-            label: 'DR. RODRIGO MEIRELLES',
-            name: 'Dr. Rodrigo Meirelles',
-            role: 'Advogado Associado | OAB/SP 398.621',
-            specialty: 'Direito do Consumidor e Responsabilidade Civil',
-            image: null,
-            initials: 'RM',
-            paragraphs: [
-              'Pós-graduado em Direito Civil e Processual Civil pela Pontifícia Universidade Católica de São Paulo (PUC-SP).',
-              'Dedicado ao contencioso cível estratégico e à resolução de disputas complexas nas relações de consumo, elaborando pareceres de risco, atuando perante órgãos de fiscalização e tribunais estaduais e superiores.',
-              'Experiência destacada na defesa de empresas em litígios de responsabilidade civil e adequação a normas consumeristas.'
-            ],
-            credentials: [
-              'Pós-Graduado em Processo Civil - PUC-SP',
-              'Especialista em Responsabilidade Civil - Escola Paulista da Magistratura (EPM)',
-              'Graduado em Direito - Universidade Presbiteriana Mackenzie'
-            ]
-          }
-        ],
-        areas: [
-          {
-            id: 'quem-somos',
-            label: 'QUEM SOMOS',
-            title: 'Quem Somos',
-            paragraphs: [
-              'Eduardo Ferrari Advogados Associados é um escritório boutique, especializado em oferecer atendimento jurídico personalizado e de excelência.',
-              'Atuamos nas áreas cível, família, sucessões, imobiliária, empresarial e trabalhista, com foco na prevenção e solução de conflitos através de estratégias sob medida para cada cliente.',
-              'Nosso objetivo precípuo é o sucesso integral de nossos clientes. Para isso, não medimos esforços para alcançar resultados excepcionais em cada demanda. Combinamos proximidade, entendimento profundo das necessidades, agilidade e expertise técnica para garantir soluções jurídicas de alto impacto, sempre com acompanhamento dedicado em todas as etapas do processo.'
-            ]
-          },
-          {
-            id: 'familia',
-            label: 'FAMÍLIA E SUCESSÕES',
-            title: 'Direito de Família e Sucessões',
-            paragraphs: [
-              'Oferecemos assessoria jurídica completa e sensível para questões familiares e patrimoniais, como divórcios, inventários, partilha de bens, planejamento sucessório e pactos antenupciais.',
-              'Nossa atuação prioriza a prevenção de conflitos, garantindo a proteção do patrimônio familiar e a tranquilidade das partes envolvidas em cada fase da vida.'
-            ]
-          },
-          {
-            id: 'imobiliario',
-            label: 'IMOBILIÁRIO',
-            title: 'Direito Imobiliário',
-            paragraphs: [
-              'Atuação especializada em regularização de imóveis, elaboração e análise de contratos de compra e venda, locações residenciais e comerciais, usucapião e estruturação de empreendimentos.',
-              'Oferecemos segurança jurídica completa para investidores, proprietários e empresas do setor imobiliário.'
-            ]
-          },
-          {
-            id: 'consumidor',
-            label: 'CONSUMIDOR',
-            title: 'Direito do Consumidor',
-            paragraphs: [
-              'Defesa estratégica de direitos em relações de consumo, atenuando litígios e atuando na reparação de danos morais e materiais, cobranças indevidas e vícios de produtos ou serviços.',
-              'Prestamos consultoria preventiva para empresas visando a total adequação às normas do Código de Defesa do Consumidor.'
-            ]
-          },
-          {
-            id: 'empresarial',
-            label: 'EMPRESARIAL',
-            title: 'Direito Empresarial',
-            paragraphs: [
-              'Consultoria e assessoria corporativa estratégica para empresas de todos os portes: constituição de sociedades, governança corporativa, planejamento tributário, fusões e aquisições (M&A).',
-              'Protegemos o desenvolvimento e a estabilidade da sua empresa através da mitigação de riscos jurídicos e elaboração de contratos comerciais de alta complexidade.'
-            ]
-          },
-          {
-            id: 'trabalhista',
-            label: 'TRABALHISTA',
-            title: 'Direito Trabalhista',
-            paragraphs: [
-              'Assessoria trabalhista preventiva e contenciosa, focada na redução de passivos trabalhistas, negociações coletivas e representação em processos trabalhistas.',
-              'Garantimos a conformidade com a legislação vigente e as melhores práticas de recursos humanos e compliance corporativo.'
-            ]
-          },
-          {
-            id: 'contratos',
-            label: 'RESPONSABILIDADE CIVIL E CONTRATOS',
-            title: 'Responsabilidade Civil e Contratos',
-            paragraphs: [
-              'Elaboração, análise e negociação de contratos nacionais e internacionais, bem como atuação em ações de reparação de danos morais, materiais e estéticos.',
-              'Buscamos defender e resguardar os interesses de nossos clientes com rigor técnico e estratégias ágeis de ressarcimento e proteção contratual.'
-            ]
-          }
-        ]
+        lawyers: cmsLawyers,
+        areas: cmsAreas
       },
       noticias: {
         heading: 'Notícias & Artigos',
@@ -230,6 +86,7 @@ export default function Home() {
         }
       },
       footer: 'Eduardo Ferrari Advogados Associados.',
+      adminLink: 'Acesso CMS / Admin',
       langBtn: 'English'
     },
     en: {
@@ -245,166 +102,8 @@ export default function Home() {
       escritorio: {
         equipeTab: 'The Team',
         areasTab: 'Practice Areas',
-        lawyers: [
-          {
-            id: 'eduardo',
-            label: 'DR. EDUARDO FERRARI',
-            name: 'Dr. Eduardo Ferrari',
-            role: 'Founding Partner | Bar No. 245.890',
-            specialty: 'Corporate Law, Mergers & Acquisitions (M&A) and Contracts',
-            image: lawyer1,
-            paragraphs: [
-              'Graduated in Law from the University of São Paulo (USP) and Master in Commercial Law from the Pontifical Catholic University of São Paulo (PUC-SP).',
-              'With over 20 years of experience in high-performance corporate legal practice, he leads corporate restructuring, corporate governance, strategic planning, and complex negotiations for domestic and international corporations.',
-              'Active member of specialized Corporate Law commissions and author of articles on legal security and business governance.'
-            ],
-            credentials: [
-              'Master in Commercial Law - PUC-SP',
-              'Specialist in Corporate Law and M&A - FGV Law SP',
-              'Bachelor of Laws - University of São Paulo (USP)'
-            ]
-          },
-          {
-            id: 'mariana',
-            label: 'DRA. MARIANA ZATS',
-            name: 'Dra. Mariana Zats',
-            role: 'Senior Partner | Bar No. 289.412',
-            specialty: 'Family Law, Estate Planning & Wealth Protection',
-            image: lawyer2,
-            paragraphs: [
-              'Specialist in Family and Probate Law from Getulio Vargas Foundation Law School (FGV-SP).',
-              'Solid expertise in high-net-worth probate proceedings, complex asset division divorces, family governance, and structured estate planning focused on asset protection and family harmony.',
-              'Known for personalized, discreet, and technically rigorous counsel in sensitive personal and wealth matters.'
-            ],
-            credentials: [
-              'Specialist in Family & Probate Law - FGV Law SP',
-              'Member of the Brazilian Family Law Institute (IBDFAM)',
-              'Bachelor of Laws - Mackenzie Presbyterian University'
-            ]
-          },
-          {
-            id: 'carlos',
-            label: 'DR. CARLOS SIMONACCI',
-            name: 'Dr. Carlos Simonacci',
-            role: 'Senior Associate Attorney | Bar No. 312.754',
-            specialty: 'Real Estate Law, Land Regularization & Urban Planning',
-            image: lawyer3,
-            paragraphs: [
-              'Postgraduate in Real Estate and Notarial Law from Escola Paulista de Direito (EPD).',
-              'Specialized consultant in due diligence for real estate acquisitions, structuring commercial and residential developments, land regularization, and atypical lease contracts (Built to Suit).',
-              'Strong track record in mitigating contractual risks and enabling high-yield real estate investments.'
-            ],
-            credentials: [
-              'Postgraduate in Real Estate Law - EPD',
-              'Specialist in Real Estate Contracts - Secovi-SP',
-              'Bachelor of Laws - Pontifical Catholic University (PUC-SP)'
-            ]
-          },
-          {
-            id: 'beatriz',
-            label: 'DRA. BEATRIZ ALBUQUERQUE',
-            name: 'Dra. Beatriz Albuquerque',
-            role: 'Associate Attorney | Bar No. 365.189',
-            specialty: 'Corporate Labor Law & Compliance',
-            image: null,
-            initials: 'BA',
-            paragraphs: [
-              'Specialist in Labor and Employment Law from the University of São Paulo (USP).',
-              'Extensive experience in preventive advisory for corporate legal and HR departments, conducting labor compliance audits, collective bargaining, and strategic employer defense.',
-              'Focused on sustainable reduction of labor liabilities and modernization of corporate internal policies.'
-            ],
-            credentials: [
-              'Specialist in Labor Law - USP',
-              'Certified Labor Compliance Specialist - LEC',
-              'Bachelor of Laws - Pontifical Catholic University (PUC-SP)'
-            ]
-          },
-          {
-            id: 'rodrigo',
-            label: 'DR. RODRIGO MEIRELLES',
-            name: 'Dr. Rodrigo Meirelles',
-            role: 'Associate Attorney | Bar No. 398.621',
-            specialty: 'Consumer Law & Civil Liability',
-            image: null,
-            initials: 'RM',
-            paragraphs: [
-              'Postgraduate in Civil Law and Civil Procedure from Pontifical Catholic University of São Paulo (PUC-SP).',
-              'Dedicated to strategic civil litigation and resolution of complex consumer disputes, delivering legal risk assessments and defending corporate clients before consumer protection bodies and superior courts.',
-              'Solid experience in civil liability defense and corporate regulatory alignment.'
-            ],
-            credentials: [
-              'Postgraduate in Civil Procedure - PUC-SP',
-              'Specialist in Civil Liability - Paulista Judiciary School (EPM)',
-              'Bachelor of Laws - Mackenzie Presbyterian University'
-            ]
-          }
-        ],
-        areas: [
-          {
-            id: 'quem-somos',
-            label: 'ABOUT US',
-            title: 'About Us',
-            paragraphs: [
-              'Eduardo Ferrari Attorneys at Law is a boutique law firm, specializing in delivering personalized, high-excellence legal services.',
-              'We operate in civil, family, probate, real estate, corporate, and labor law, focusing on conflict prevention and resolution through tailored strategies for each client.',
-              'Our primary goal is the integral success of our clients. To achieve this, we spare no effort to deliver exceptional results in every demand, combining proximity, deep understanding of needs, agility, and technical expertise to ensure high-impact legal solutions, always with dedicated follow-up at every stage.'
-            ]
-          },
-          {
-            id: 'familia',
-            label: 'FAMILY & PROBATE',
-            title: 'Family & Probate Law',
-            paragraphs: [
-              'We offer comprehensive and compassionate legal counsel for family and estate matters, such as divorces, probate, asset division, estate planning, and prenuptial agreements.',
-              'Our practice prioritizes conflict prevention, safeguarding family wealth and peace of mind at every stage of life.'
-            ]
-          },
-          {
-            id: 'imobiliario',
-            label: 'REAL ESTATE',
-            title: 'Real Estate Law',
-            paragraphs: [
-              'Specialized legal services in property regularization, drafting and reviewing purchase/sale and lease agreements, adverse possession (usucapion), and real estate development structuring.',
-              'We provide full legal security for investors, property owners, and real estate companies.'
-            ]
-          },
-          {
-            id: 'consumidor',
-            label: 'CONSUMER LAW',
-            title: 'Consumer Defense Law',
-            paragraphs: [
-              'Strategic defense of consumer rights, mitigating litigation and pursuing compensation for moral and material damages, improper charges, and product or service defects.',
-              'We provide preventive consulting for companies seeking full compliance with consumer defense regulations.'
-            ]
-          },
-          {
-            id: 'empresarial',
-            label: 'CORPORATE LAW',
-            title: 'Corporate & Business Law',
-            paragraphs: [
-              'Strategic corporate legal advisory for companies of all sizes: business entity formation, corporate governance, tax planning, mergers and acquisitions (M&A).',
-              'We protect your company growth and stability by mitigating legal risks and drafting high-complexity commercial contracts.'
-            ]
-          },
-          {
-            id: 'trabalhista',
-            label: 'LABOR & EMPLOYMENT',
-            title: 'Labor & Employment Law',
-            paragraphs: [
-              'Preventive and contentious labor advisory, focused on reducing labor liabilities, collective bargaining, and representation in labor lawsuits.',
-              'We ensure full compliance with current labor legislation and corporate HR best practices.'
-            ]
-          },
-          {
-            id: 'contratos',
-            label: 'CIVIL LIABILITY & CONTRACTS',
-            title: 'Civil Liability & Contracts',
-            paragraphs: [
-              'Drafting, analysis, and negotiation of national and international contracts, as well as representation in claims for moral, material, and aesthetic damages.',
-              'We aim to protect our clients interests with technical rigor and swift protective strategies.'
-            ]
-          }
-        ]
+        lawyers: cmsLawyers,
+        areas: cmsAreas
       },
       noticias: {
         heading: 'News & Articles',
@@ -446,6 +145,7 @@ export default function Home() {
         }
       },
       footer: 'Eduardo Ferrari Attorneys at Law.',
+      adminLink: 'CMS / Admin Access',
       langBtn: 'Português'
     }
   };
@@ -488,8 +188,8 @@ export default function Home() {
     setMenuOpen(false);
   };
 
-  const currentSelectedLawyer = t.escritorio.lawyers.find(l => l.id === activeLawyerId) || t.escritorio.lawyers[0];
-  const currentSelectedArea = t.escritorio.areas.find(s => s.id === activeServiceId) || t.escritorio.areas[0];
+  const currentSelectedLawyer = t.escritorio.lawyers.find(l => l.id === activeLawyerId) || t.escritorio.lawyers[0] || null;
+  const currentSelectedArea = t.escritorio.areas.find(s => s.id === activeServiceId) || t.escritorio.areas[0] || null;
 
   return (
     <div className="home-container">
@@ -613,6 +313,16 @@ export default function Home() {
           >
             {t.nav.contato}
           </button>
+
+          <div style={{ marginTop: '20px', borderTop: '1px solid rgba(240, 105, 73, 0.2)', paddingTop: '15px' }}>
+            <button 
+              className="drawer-subitem" 
+              style={{ color: '#f06949', opacity: 0.9 }}
+              onClick={onNavigateToAdmin}
+            >
+              ⚙️ {t.adminLink}
+            </button>
+          </div>
         </nav>
       </div>
 
@@ -633,6 +343,13 @@ export default function Home() {
             </div>
             <footer className="footer-bar">
               <span>&copy; {new Date().getFullYear()} {t.footer}</span>
+              <button 
+                className="footer-admin-link"
+                onClick={onNavigateToAdmin}
+                title="Acessar o Gerenciador de Conteúdo CMS"
+              >
+                🔒 {t.adminLink}
+              </button>
             </footer>
           </section>
         )}
@@ -674,14 +391,14 @@ export default function Home() {
                         onClick={() => setActiveLawyerId(lawyer.id)}
                       >
                         <span className="tab-indicator"></span>
-                        {lawyer.label}
+                        {lawyer.label || lawyer.name.toUpperCase()}
                       </button>
                     ))}
                   </div>
 
                   {/* Right Content Panel: Lawyer Profile */}
                   <div className="services-content-card">
-                    {currentSelectedLawyer && (
+                    {currentSelectedLawyer ? (
                       <div className="lawyer-profile-detail animate-fade" key={currentSelectedLawyer.id}>
                         <div className="lawyer-detail-header">
                           <div className="lawyer-detail-avatar-wrapper">
@@ -713,9 +430,13 @@ export default function Home() {
                         <div className="service-detail-divider"></div>
 
                         <div className="service-paragraphs">
-                          {currentSelectedLawyer.paragraphs.map((p, idx) => (
-                            <p key={idx} className="service-paragraph">{p}</p>
-                          ))}
+                          {Array.isArray(currentSelectedLawyer.paragraphs) ? (
+                            currentSelectedLawyer.paragraphs.map((p, idx) => (
+                              <p key={idx} className="service-paragraph">{p}</p>
+                            ))
+                          ) : (
+                            <p className="service-paragraph">{currentSelectedLawyer.paragraphs}</p>
+                          )}
                         </div>
 
                         {currentSelectedLawyer.credentials && currentSelectedLawyer.credentials.length > 0 && (
@@ -734,6 +455,8 @@ export default function Home() {
                           </div>
                         )}
                       </div>
+                    ) : (
+                      <p className="service-paragraph">Nenhum advogado cadastrado no momento.</p>
                     )}
                   </div>
                 </div>
@@ -758,18 +481,24 @@ export default function Home() {
 
                   {/* Right Content Panel */}
                   <div className="services-content-card">
-                    {currentSelectedArea && (
+                    {currentSelectedArea ? (
                       <div className="service-details animate-fade" key={currentSelectedArea.id}>
                         <h3 className="service-detail-title">
                           {currentSelectedArea.title}
                         </h3>
                         <div className="service-detail-divider"></div>
                         <div className="service-paragraphs">
-                          {currentSelectedArea.paragraphs.map((p, idx) => (
-                            <p key={idx} className="service-paragraph">{p}</p>
-                          ))}
+                          {Array.isArray(currentSelectedArea.paragraphs) ? (
+                            currentSelectedArea.paragraphs.map((p, idx) => (
+                              <p key={idx} className="service-paragraph">{p}</p>
+                            ))
+                          ) : (
+                            <p className="service-paragraph">{currentSelectedArea.paragraphs}</p>
+                          )}
                         </div>
                       </div>
+                    ) : (
+                      <p className="service-paragraph">Nenhuma área de atuação cadastrada.</p>
                     )}
                   </div>
                 </div>
@@ -778,6 +507,13 @@ export default function Home() {
             </div>
             <footer className="footer-bar inner-footer">
               <span>&copy; {new Date().getFullYear()} {t.footer}</span>
+              <button 
+                className="footer-admin-link"
+                onClick={onNavigateToAdmin}
+                title="Acessar o Gerenciador de Conteúdo CMS"
+              >
+                🔒 {t.adminLink}
+              </button>
             </footer>
           </section>
         )}
@@ -804,6 +540,13 @@ export default function Home() {
             </div>
             <footer className="footer-bar inner-footer">
               <span>&copy; {new Date().getFullYear()} {t.footer}</span>
+              <button 
+                className="footer-admin-link"
+                onClick={onNavigateToAdmin}
+                title="Acessar o Gerenciador de Conteúdo CMS"
+              >
+                🔒 {t.adminLink}
+              </button>
             </footer>
           </section>
         )}
@@ -861,21 +604,38 @@ export default function Home() {
             </div>
             <footer className="footer-bar inner-footer">
               <span>&copy; {new Date().getFullYear()} {t.footer}</span>
+              <button 
+                className="footer-admin-link"
+                onClick={onNavigateToAdmin}
+                title="Acessar o Gerenciador de Conteúdo CMS"
+              >
+                🔒 {t.adminLink}
+              </button>
             </footer>
           </section>
         )}
       </div>
 
-      {/* Discreet Floating Language Switcher */}
-      <button 
-        className="lang-switcher-btn" 
-        onClick={toggleLanguage} 
-        aria-label="Toggle Language"
-      >
-        <span className="lang-icon">🌐</span>
-        <span>{t.langBtn}</span>
-      </button>
+      {/* Discreet Floating Language Switcher & CMS Button */}
+      <div className="floating-bottom-controls">
+        <button 
+          className="admin-floating-badge" 
+          onClick={onNavigateToAdmin}
+          title="Abrir Painel Administrativo / CMS"
+        >
+          <span>⚙️</span>
+          <span>CMS</span>
+        </button>
+
+        <button 
+          className="lang-switcher-btn" 
+          onClick={toggleLanguage} 
+          aria-label="Toggle Language"
+        >
+          <span className="lang-icon">🌐</span>
+          <span>{t.langBtn}</span>
+        </button>
+      </div>
     </div>
   );
 }
-

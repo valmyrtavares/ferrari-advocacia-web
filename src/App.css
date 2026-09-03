@@ -1219,12 +1219,47 @@ html, body, #root {
   }
 }
 
-/* Floating Language Switcher Button */
-.lang-switcher-btn {
+/* Floating Bottom Controls (Language & CMS button) */
+.floating-bottom-controls {
   position: fixed;
   bottom: 25px;
   right: 25px;
   z-index: 1005;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-floating-badge {
+  background: rgba(16, 18, 27, 0.85);
+  border: 1px solid rgba(240, 105, 73, 0.35);
+  color: #f06949;
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-floating-badge:hover {
+  background: #f06949;
+  color: #090a0f;
+  border-color: #f06949;
+  box-shadow: 0 6px 25px rgba(240, 105, 73, 0.4);
+  transform: translateY(-2px);
+}
+
+.lang-switcher-btn {
   background: rgba(16, 18, 27, 0.85);
   border: 1px solid rgba(240, 105, 73, 0.35);
   color: #f06949;
@@ -1257,11 +1292,33 @@ html, body, #root {
   font-size: 1rem;
 }
 
+.footer-admin-link {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 0.72rem;
+  cursor: pointer;
+  margin-left: 12px;
+  transition: color 0.2s ease;
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.footer-admin-link:hover {
+  color: #f06949;
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
-  .lang-switcher-btn {
-    bottom: 20px;
+  .floating-bottom-controls {
+    bottom: 18px;
     right: 18px;
-    padding: 8px 14px;
-    font-size: 0.75rem;
+    gap: 8px;
+  }
+
+  .admin-floating-badge, .lang-switcher-btn {
+    padding: 8px 12px;
+    font-size: 0.72rem;
   }
 }
