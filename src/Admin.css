@@ -1231,11 +1231,7 @@
   min-height: 100vh;
   width: 100vw;
   position: relative;
-  background-color: #f8fafc;
-  background-image: 
-    radial-gradient(circle at 10% 15%, rgba(15, 43, 72, 0.04) 0%, transparent 45%),
-    radial-gradient(circle at 90% 85%, rgba(15, 43, 72, 0.03) 0%, transparent 45%),
-    linear-gradient(180deg, #ffffff 0%, #f8fafc 60%, #f1f5f9 100%);
+  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1267,6 +1263,7 @@
   max-height: 70px;
   width: auto;
   object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 .login-divider {

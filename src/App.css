@@ -10,18 +10,14 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 
 .home-container {
   height: 100vh;
   width: 100%;
   position: relative;
-  background-color: #f8fafc;
-  background-image: 
-    radial-gradient(circle at 10% 15%, rgba(15, 43, 72, 0.035) 0%, transparent 45%),
-    radial-gradient(circle at 90% 85%, rgba(15, 43, 72, 0.025) 0%, transparent 45%),
-    linear-gradient(180deg, #ffffff 0%, #f8fafc 60%, #f1f5f9 100%);
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -29,17 +25,7 @@ html, body, #root {
 
 /* Subtle background texture overlay */
 .background-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(rgba(15, 43, 72, 0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
-  opacity: 0.6;
-  pointer-events: none;
-  z-index: 1;
+  display: none;
 }
 
 .home-header {
@@ -66,11 +52,17 @@ html, body, #root {
   height: 60px;
   width: auto;
   object-fit: contain;
+  mix-blend-mode: multiply;
   transition: transform 0.3s ease;
 }
 
 .site-header-logo-img:hover {
   transform: scale(1.02);
+}
+
+.header-left-nav {
+  display: flex;
+  align-items: center;
 }
 
 .desktop-nav {
@@ -406,7 +398,7 @@ html, body, #root {
   max-width: 580px;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 6px 16px rgba(15, 43, 72, 0.08));
+  mix-blend-mode: multiply;
 }
 
 .brand-tagline {
@@ -2048,6 +2040,7 @@ html, body, #root {
 }
 
 @media (max-width: 900px) {
+  .header-left-nav,
   .desktop-nav {
     display: none;
   }

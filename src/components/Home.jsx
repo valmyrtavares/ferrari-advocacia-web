@@ -300,28 +300,18 @@ export default function Home({ onNavigateToAdmin }) {
 
       {/* Top Header Section (Floating transparent header) */}
       <header className="home-header">
-        <div 
-          className="logo-container" 
-          onClick={() => navigateToHash('home')} 
-          style={{ cursor: 'pointer' }}
-          title="Eduardo Ferrari Advocacia - Página Inicial"
-        >
-          <img 
-            src="/image/logo ferrari-escritorio-28-11-25.jpg" 
-            alt="Eduardo Ferrari Advocacia" 
-            className="site-header-logo-img" 
-          />
-        </div>
-
-        {/* Desktop Inline Navigation */}
-        <nav className="desktop-nav">
+        {/* Left Home Button */}
+        <div className="header-left-nav">
           <button 
             className={`nav-btn ${currentPage === 'home' ? 'active' : ''}`} 
             onClick={() => navigateToHash('home')}
           >
             {t.nav.home}
           </button>
-          
+        </div>
+
+        {/* Desktop Inline Navigation (Right Side) */}
+        <nav className="desktop-nav">
           {/* O Escritório with Dropdown Submenu */}
           <div className="nav-dropdown-item">
             <button 
@@ -468,16 +458,6 @@ export default function Home({ onNavigateToAdmin }) {
               </div>
               <div className="brand-tagline">{t.hero.tagline}</div>
             </div>
-            <footer className="footer-bar">
-              <span>&copy; {new Date().getFullYear()} {t.footer}</span>
-              <button 
-                className="footer-admin-link"
-                onClick={onNavigateToAdmin}
-                title="Acessar o Gerenciador de Conteúdo CMS"
-              >
-                🔒 {t.adminLink}
-              </button>
-            </footer>
           </section>
         )}
 
