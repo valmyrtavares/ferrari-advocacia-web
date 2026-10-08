@@ -139,7 +139,7 @@ export default function Home({ onNavigateToAdmin }) {
         contato: 'Contato'
       },
       hero: {
-        tagline: 'ADVOGADOS ASSOCIADOS'
+        tagline: 'ADVOCACIA CRIMINAL'
       },
       escritorio: {
         equipeTab: 'A Equipe',
@@ -158,8 +158,7 @@ export default function Home({ onNavigateToAdmin }) {
         articles: cmsArticles
       },
       contato: {
-        heading: cmsContact.title || 'Fale Conosco',
-        companyName: cmsContact.companyName || 'EDUARDO FERRARI ADVOGADOS ASSOCIADOS',
+        heading: 'Fale Conosco',
         subtitle: cmsContact.subtitle || 'Agende uma consulta presencial ou remota com nossa equipe de especialistas jurídicos.',
         address: cmsContact.address || 'Al. Tangará, 80, Sala 1, The Point Office, Cotia-SP, CEP 06711-020',
         phone: cmsContact.phone || '+55 (11) 98899-4871',
@@ -173,7 +172,7 @@ export default function Home({ onNavigateToAdmin }) {
           submit: 'Enviar via WhatsApp'
         }
       },
-      footer: 'Eduardo Ferrari Advogados Associados.',
+      footer: 'Eduardo Ferrari Advocacia Criminal.',
       adminLink: 'Acesso CMS / Admin',
       langBtn: 'English'
     },
@@ -186,7 +185,7 @@ export default function Home({ onNavigateToAdmin }) {
         contato: 'Contact'
       },
       hero: {
-        tagline: 'ATTORNEYS AT LAW'
+        tagline: 'CRIMINAL LAW'
       },
       escritorio: {
         equipeTab: 'The Team',
@@ -205,8 +204,7 @@ export default function Home({ onNavigateToAdmin }) {
         articles: cmsArticles
       },
       contato: {
-        heading: cmsContact.title || 'Contact Us',
-        companyName: cmsContact.companyName || 'EDUARDO FERRARI ATTORNEYS AT LAW',
+        heading: 'Contact Us',
         subtitle: cmsContact.subtitle || 'Schedule an in-person or remote consultation with our team of legal experts.',
         address: cmsContact.address || 'Al. Tangará, 80, Suite 1, The Point Office, Cotia-SP, Brazil, CEP 06711-020',
         phone: cmsContact.phone || '+55 (11) 98899-4871',
@@ -220,7 +218,7 @@ export default function Home({ onNavigateToAdmin }) {
           submit: 'Send via WhatsApp'
         }
       },
-      footer: 'Eduardo Ferrari Attorneys at Law.',
+      footer: 'Eduardo Ferrari Criminal Law.',
       adminLink: 'CMS / Admin Access',
       langBtn: 'Português'
     }
@@ -245,7 +243,7 @@ export default function Home({ onNavigateToAdmin }) {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const phoneNumber = (cmsContact && cmsContact.whatsappNumber) ? cmsContact.whatsappNumber.replace(/\D/g, '') : "5511988994871";
-    const text = `*${lang === 'pt' ? 'Novo Contato via Site Eduardo Ferrari Advogados' : 'New Contact via Eduardo Ferrari Law Website'}*\n\n` +
+    const text = `*${lang === 'pt' ? 'Novo Contato via Site Eduardo Ferrari Advocacia' : 'New Contact via Eduardo Ferrari Law Website'}*\n\n` +
                  `👤 *${t.contato.labels.name}:* ${formData.name}\n` +
                  `✉️ *${t.contato.labels.email}:* ${formData.email}\n` +
                  `📞 *${t.contato.labels.phone}:* ${formData.phone}\n\n` +
@@ -300,18 +298,36 @@ export default function Home({ onNavigateToAdmin }) {
 
       {/* Top Header Section (Floating transparent header) */}
       <header className="home-header">
-        {/* Left Home Button */}
+        {/* Left Brand Identity: Full logo lockup (Logo + Subtitle underneath) */}
         <div className="header-left-nav">
+          <button 
+            className="header-brand-btn" 
+            onClick={() => navigateToHash('home')}
+            aria-label="Eduardo Ferrari Advocacia Criminal - Início"
+          >
+            <div className="header-brand-wrapper">
+              <img 
+                src="/image/logo ferrari-escritorio-28-11-25.jpg" 
+                alt="Eduardo Ferrari Advocacia" 
+                className="header-brand-logo-img" 
+              />
+              <div className="header-brand-tagline">
+                {t.hero.tagline}
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* Desktop Inline Navigation (Right Side) */}
+        <nav className="desktop-nav">
+          {/* Home Button positioned next to O Escritório */}
           <button 
             className={`nav-btn ${currentPage === 'home' ? 'active' : ''}`} 
             onClick={() => navigateToHash('home')}
           >
             {t.nav.home}
           </button>
-        </div>
 
-        {/* Desktop Inline Navigation (Right Side) */}
-        <nav className="desktop-nav">
           {/* O Escritório with Dropdown Submenu */}
           <div className="nav-dropdown-item">
             <button 
@@ -445,19 +461,9 @@ export default function Home({ onNavigateToAdmin }) {
       {/* Dynamic Screen Content Wrapper */}
       <div className="app-screen-content">
         
-        {/* Screen 1: Home Hero (EDUARDO FERRARI) */}
+        {/* Screen 1: Home View (Blank canvas for future home content) */}
         {currentPage === 'home' && (
-          <section className="screen-section home-hero-view">
-            <div className="brand-block">
-              <div className="hero-logo-wrapper">
-                <img 
-                  src="/image/logo ferrari-escritorio-28-11-25.jpg" 
-                  alt="Eduardo Ferrari Advocacia" 
-                  className="hero-main-logo-img" 
-                />
-              </div>
-              <div className="brand-tagline">{t.hero.tagline}</div>
-            </div>
+          <section className="screen-section home-blank-view">
           </section>
         )}
 
@@ -860,7 +866,18 @@ export default function Home({ onNavigateToAdmin }) {
               <div className="section-divider"></div>
               <div className="contact-grid">
                 <div className="contact-info animate-fade">
-                  <h3 className="contact-info-title">{t.contato.companyName}</h3>
+                  <div className="contact-brand-block">
+                    <div className="contact-brand-logo-wrapper">
+                      <img 
+                        src="/image/logo ferrari-escritorio-28-11-25.jpg" 
+                        alt="Eduardo Ferrari Advocacia" 
+                        className="contact-brand-logo-img" 
+                      />
+                    </div>
+                    <div className="contact-brand-tagline">
+                      {t.hero.tagline}
+                    </div>
+                  </div>
                   <p className="contact-info-text">{t.contato.subtitle}</p>
                   <div className="contact-details">
                     <div className="detail-item">

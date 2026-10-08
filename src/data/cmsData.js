@@ -214,7 +214,7 @@ export const INITIAL_ARTICLES = [
 
 export const INITIAL_CONTACT = {
   title: 'Fale Conosco',
-  companyName: 'EDUARDO FERRARI ADVOGADOS ASSOCIADOS',
+  companyName: 'EDUARDO FERRARI ADVOCACIA CRIMINAL',
   subtitle: 'Agende uma consulta presencial ou remota com nossa equipe de especialistas jurídicos.',
   address: 'Al. Tangará, 80, Sala 1, The Point Office, Cotia-SP, CEP 06711-020',
   phone: '+55 (11) 98899-4871',

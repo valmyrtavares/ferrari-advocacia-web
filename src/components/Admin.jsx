@@ -902,33 +902,6 @@ export default function Admin({ onNavigateToSite }) {
                 <form onSubmit={handleSaveContact} className="admin-contact-form-box">
                   <h3 className="editor-card-title">📝 Dados da Empresa & Canais de Atendimento</h3>
                   
-                  <div className="form-row">
-                    <div className="form-group flex-1">
-                      <label className="admin-form-label" htmlFor="contact-title">Título da Seção *</label>
-                      <input 
-                        id="contact-title"
-                        type="text" 
-                        className="admin-input" 
-                        value={contact.title}
-                        onChange={(e) => handleContactChange('title', e.target.value)}
-                        placeholder="Ex: Fale Conosco"
-                        required
-                      />
-                    </div>
-                    <div className="form-group flex-1">
-                      <label className="admin-form-label" htmlFor="contact-company">Nome / Razão Social *</label>
-                      <input 
-                        id="contact-company"
-                        type="text" 
-                        className="admin-input" 
-                        value={contact.companyName}
-                        onChange={(e) => handleContactChange('companyName', e.target.value)}
-                        placeholder="Ex: EDUARDO FERRARI ADVOGADOS ASSOCIADOS"
-                        required
-                      />
-                    </div>
-                  </div>
-
                   <div className="form-group">
                     <label className="admin-form-label" htmlFor="contact-subtitle">Subtítulo / Mensagem de Acolhimento</label>
                     <input 
@@ -1022,9 +995,18 @@ export default function Admin({ onNavigateToSite }) {
                 <div className="admin-contact-preview-box">
                   <h3 className="preview-box-title">👁️ Visualização em Tempo Real no Site</h3>
                   <div className="site-preview-card">
-                    <h4 className="preview-heading">{contact.title || 'Fale Conosco'}</h4>
+                    <h4 className="preview-heading">Fale Conosco</h4>
                     <div className="preview-divider"></div>
-                    <h5 className="preview-company">{contact.companyName || 'EDUARDO FERRARI ADVOGADOS'}</h5>
+                    <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+                      <img 
+                        src="/image/logo ferrari-escritorio-28-11-25.jpg" 
+                        alt="Eduardo Ferrari" 
+                        style={{ height: '36px', mixBlendMode: 'multiply' }} 
+                      />
+                      <div style={{ fontSize: '0.6rem', letterSpacing: '2px', fontWeight: '700', color: '#0f2b48', marginTop: '2px', textTransform: 'uppercase' }}>
+                        ADVOCACIA CRIMINAL
+                      </div>
+                    </div>
                     <p className="preview-subtitle">{contact.subtitle}</p>
 
                     <div className="preview-details-list">
