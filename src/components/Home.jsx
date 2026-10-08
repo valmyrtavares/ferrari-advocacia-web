@@ -134,7 +134,7 @@ export default function Home({ onNavigateToAdmin }) {
       nav: {
         home: 'Home',
         escritorio: 'O Escritório',
-        noticias: 'Notícias & Artigos',
+        noticias: 'Conteúdo',
         areaCliente: 'Área do Cliente',
         contato: 'Contato'
       },
@@ -148,10 +148,10 @@ export default function Home({ onNavigateToAdmin }) {
         areas: cmsAreas
       },
       noticias: {
-        heading: 'Notícias & Artigos',
+        heading: 'Conteúdo',
         subtitle: 'Análises jurídicas estratégicas, decisões recentes e atualizações legislativas.',
-        readMore: 'Ler Artigo Integral →',
-        backToList: '← Voltar para Todos os Artigos',
+        readMore: 'Ler Conteúdo Integral →',
+        backToList: '← Voltar para Todos os Conteúdos',
         videoLabel: 'Vídeo Explicativo:',
         contactCta: 'Deseja esclarecer dúvidas sobre este tema? Entre em contato com nosso escritório.',
         contactBtn: 'Falar com um Advogado via WhatsApp',
@@ -180,7 +180,7 @@ export default function Home({ onNavigateToAdmin }) {
       nav: {
         home: 'Home',
         escritorio: 'The Firm',
-        noticias: 'News & Articles',
+        noticias: 'Content',
         areaCliente: 'Client Portal',
         contato: 'Contact'
       },
@@ -194,10 +194,10 @@ export default function Home({ onNavigateToAdmin }) {
         areas: cmsAreas
       },
       noticias: {
-        heading: 'News & Articles',
+        heading: 'Content',
         subtitle: 'Strategic legal insights, recent court decisions, and regulatory updates.',
-        readMore: 'Read Full Article →',
-        backToList: '← Back to All Articles',
+        readMore: 'Read Full Content →',
+        backToList: '← Back to All Content',
         videoLabel: 'Video Commentary:',
         contactCta: 'Have questions regarding this legal topic? Contact our legal team.',
         contactBtn: 'Talk to an Attorney on WhatsApp',
