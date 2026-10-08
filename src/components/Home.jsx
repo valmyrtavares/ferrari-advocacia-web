@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import ClientArea from './ClientArea';
 import {
   getStoredLawyers,
   getStoredAreas,
@@ -10,7 +9,7 @@ import {
 
 export default function Home({ onNavigateToAdmin }) {
   // Navigation & URL Routing States
-  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'escritorio' | 'noticias' | 'cliente' | 'contato'
+  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'escritorio' | 'noticias' | 'contato'
   const [officeTab, setOfficeTab] = useState('areas'); // 'equipe' | 'areas'
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeServiceId, setActiveServiceId] = useState('quem-somos');
@@ -65,9 +64,6 @@ export default function Home({ onNavigateToAdmin }) {
       } else {
         setSelectedArticleId(null);
       }
-    } else if (mainSection === 'cliente' || mainSection === 'area-cliente') {
-      setCurrentPage('cliente');
-      setSelectedArticleId(null);
     } else if (mainSection === 'contato') {
       setCurrentPage('contato');
       setSelectedArticleId(null);
@@ -135,7 +131,6 @@ export default function Home({ onNavigateToAdmin }) {
         home: 'Home',
         escritorio: 'O Escritório',
         noticias: 'Conteúdo',
-        areaCliente: 'Área do Cliente',
         contato: 'Contato'
       },
       hero: {
@@ -181,7 +176,6 @@ export default function Home({ onNavigateToAdmin }) {
         home: 'Home',
         escritorio: 'The Firm',
         noticias: 'Content',
-        areaCliente: 'Client Portal',
         contato: 'Contact'
       },
       hero: {
@@ -360,15 +354,6 @@ export default function Home({ onNavigateToAdmin }) {
             {t.nav.noticias}
           </button>
 
-          {/* 5th Navigation Button: Área do Cliente */}
-          <button 
-            className={`nav-btn client-nav-btn ${currentPage === 'cliente' ? 'active' : ''}`} 
-            onClick={() => navigateToHash('cliente')}
-          >
-            <span className="client-nav-icon">🔒</span>
-            <span>{t.nav.areaCliente}</span>
-          </button>
-
           <button 
             className={`nav-btn ${currentPage === 'contato' ? 'active' : ''}`} 
             onClick={() => navigateToHash('contato')}
@@ -427,13 +412,6 @@ export default function Home({ onNavigateToAdmin }) {
             onClick={() => navigateToHash('noticias')}
           >
             {t.nav.noticias}
-          </button>
-
-          <button 
-            className={`drawer-link ${currentPage === 'cliente' ? 'active' : ''}`}
-            onClick={() => navigateToHash('cliente')}
-          >
-            🔒 {t.nav.areaCliente}
           </button>
 
           <button 
@@ -835,30 +813,7 @@ export default function Home({ onNavigateToAdmin }) {
           </section>
         )}
 
-        {/* Screen 4: Área do Cliente (Process Tracking & Digital Documents Portal) */}
-        {currentPage === 'cliente' && (
-          <section className="screen-section scrollable-view">
-            <div className="section-inner-container">
-              <ClientArea 
-                onBackToHome={() => navigateToHash('home')} 
-                whatsappContactNumber={cmsContact?.whatsappNumber || "5511988994871"}
-                lang={lang}
-              />
-            </div>
-            <footer className="footer-bar inner-footer">
-              <span>&copy; {new Date().getFullYear()} {t.footer}</span>
-              <button 
-                className="footer-admin-link"
-                onClick={onNavigateToAdmin}
-                title="Acessar o Gerenciador de Conteúdo CMS"
-              >
-                🔒 {t.adminLink}
-              </button>
-            </footer>
-          </section>
-        )}
-
-        {/* Screen 5: Contato */}
+        {/* Screen 4: Contato */}
         {currentPage === 'contato' && (
           <section className="screen-section scrollable-view">
             <div className="section-inner-container">

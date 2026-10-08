@@ -104,10 +104,12 @@ html, body, #root {
 
 .desktop-nav {
   display: flex;
-  gap: 32px;
-  margin-left: auto;
-  margin-right: 20px;
+  justify-content: space-between;
   align-items: center;
+  width: clamp(480px, 52vw, 760px);
+  margin-left: auto;
+  margin-right: 15px;
+  gap: 16px;
 }
 
 .nav-btn {
@@ -116,17 +118,18 @@ html, body, #root {
   cursor: pointer;
   color: #0f2b48;
   font-family: var(--font-heading);
-  font-size: 0.88rem;
+  font-size: 0.90rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.8px;
-  padding: 8px 0;
+  letter-spacing: 2px;
+  padding: 8px 4px;
   border-bottom: 2px solid transparent;
   transition: all 0.25s ease;
   opacity: 0.8;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .nav-btn:hover {
