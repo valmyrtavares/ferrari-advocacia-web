@@ -439,9 +439,19 @@ export default function Home({ onNavigateToAdmin }) {
       {/* Dynamic Screen Content Wrapper */}
       <div className="app-screen-content">
         
-        {/* Screen 1: Home View (Blank canvas for future home content) */}
+        {/* Screen 1: Home Hero View (Central Logo) */}
         {currentPage === 'home' && (
-          <section className="screen-section home-blank-view">
+          <section className="screen-section home-hero-view">
+            <div className="brand-block">
+              <div className="hero-logo-wrapper">
+                <img 
+                  src="/image/logo ferrari-escritorio-28-11-25.jpg" 
+                  alt="Eduardo Ferrari Advocacia" 
+                  className="hero-main-logo-img" 
+                />
+              </div>
+              <div className="brand-tagline">{t.hero.tagline}</div>
+            </div>
           </section>
         )}
 
