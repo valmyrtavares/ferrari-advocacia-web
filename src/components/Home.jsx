@@ -7,42 +7,24 @@ import {
   getEmbedVideoUrl
 } from '../data/cmsData';
 
-// Helper to determine whether the site is unlocked (e.g. accessed via /construindo/)
+// Helper to determine whether the site is unlocked strictly via URL (e.g. /construindo/)
 const checkIsUnlocked = () => {
   if (typeof window === 'undefined') return false;
   const path = window.location.pathname.toLowerCase();
   const hash = window.location.hash.toLowerCase();
   const search = window.location.search.toLowerCase();
 
-  // Test override to lock site again if needed
-  if (search.includes('lock') || search.includes('bloqueado') || hash.includes('bloqueado')) {
-    try {
-      sessionStorage.removeItem('eferrari_preview_unlocked');
-    } catch (e) {}
-    return false;
-  }
-
-  // Check if URL has 'construindo' (path, hash or query parameter)
-  const hasConstruindoInUrl = 
-    path.includes('construindo') || 
-    hash.includes('construindo') || 
-    search.includes('construindo');
-
-  if (hasConstruindoInUrl) {
-    try {
-      sessionStorage.setItem('eferrari_preview_unlocked', 'true');
-    } catch (e) {}
-    return true;
-  }
-
-  // Check if session was previously unlocked
+  // Clean any old session retention
   try {
-    if (sessionStorage.getItem('eferrari_preview_unlocked') === 'true') {
-      return true;
-    }
+    sessionStorage.removeItem('eferrari_preview_unlocked');
   } catch (e) {}
 
-  return false;
+  // Strictly unlocked only if current URL contains 'construindo'
+  return (
+    path.includes('construindo') || 
+    hash.includes('construindo') || 
+    search.includes('construindo')
+  );
 };
 
 export default function Home({ onNavigateToAdmin }) {
