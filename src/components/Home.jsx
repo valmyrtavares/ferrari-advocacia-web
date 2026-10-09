@@ -7,7 +7,49 @@ import {
   getEmbedVideoUrl
 } from '../data/cmsData';
 
+// Helper to determine whether the site is unlocked (e.g. accessed via /construindo/)
+const checkIsUnlocked = () => {
+  if (typeof window === 'undefined') return false;
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  const search = window.location.search.toLowerCase();
+
+  // Test override to lock site again if needed
+  if (search.includes('lock') || search.includes('bloqueado') || hash.includes('bloqueado')) {
+    try {
+      sessionStorage.removeItem('eferrari_preview_unlocked');
+    } catch (e) {}
+    return false;
+  }
+
+  // Check if URL has 'construindo' (path, hash or query parameter)
+  const hasConstruindoInUrl = 
+    path.includes('construindo') || 
+    hash.includes('construindo') || 
+    search.includes('construindo');
+
+  if (hasConstruindoInUrl) {
+    try {
+      sessionStorage.setItem('eferrari_preview_unlocked', 'true');
+    } catch (e) {}
+    return true;
+  }
+
+  // Check if session was previously unlocked
+  try {
+    if (sessionStorage.getItem('eferrari_preview_unlocked') === 'true') {
+      return true;
+    }
+  } catch (e) {}
+
+  return false;
+};
+
 export default function Home({ onNavigateToAdmin }) {
+  // Construction Mode State
+  const [isUnlocked, setIsUnlocked] = useState(checkIsUnlocked);
+  const isUnderConstruction = !isUnlocked;
+
   // Navigation & URL Routing States
   const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'escritorio' | 'noticias' | 'contato'
   const [officeTab, setOfficeTab] = useState('areas'); // 'equipe' | 'areas'
@@ -28,6 +70,7 @@ export default function Home({ onNavigateToAdmin }) {
 
   // Parse URL Hash for direct link sharing
   const applyRouteFromHash = () => {
+    const unlocked = checkIsUnlocked();
     const hash = window.location.hash.replace(/^#\/?/, '').trim();
     if (!hash || hash === 'home') {
       setCurrentPage('home');
@@ -40,6 +83,14 @@ export default function Home({ onNavigateToAdmin }) {
 
     if (mainSection === 'admin') {
       onNavigateToAdmin();
+      return;
+    }
+
+    // If in construction mode, protect and prevent direct hash access to office and content
+    if (!unlocked && (mainSection === 'escritorio' || mainSection === 'noticias' || mainSection === 'artigos')) {
+      setCurrentPage('home');
+      setSelectedArticleId(null);
+      window.location.hash = '#/home';
       return;
     }
 
@@ -72,17 +123,26 @@ export default function Home({ onNavigateToAdmin }) {
 
   // Synchronize on mount and URL change
   useEffect(() => {
-    applyRouteFromHash();
-    window.addEventListener('hashchange', applyRouteFromHash);
-    window.addEventListener('popstate', applyRouteFromHash);
+    const handleRouteSync = () => {
+      setIsUnlocked(checkIsUnlocked());
+      applyRouteFromHash();
+    };
+
+    handleRouteSync();
+    window.addEventListener('hashchange', handleRouteSync);
+    window.addEventListener('popstate', handleRouteSync);
     return () => {
-      window.removeEventListener('hashchange', applyRouteFromHash);
-      window.removeEventListener('popstate', applyRouteFromHash);
+      window.removeEventListener('hashchange', handleRouteSync);
+      window.removeEventListener('popstate', handleRouteSync);
     };
   }, []);
 
   // Update URL Hash helper
   const navigateToHash = (page, subTab = null, itemId = null) => {
+    if (isUnderConstruction && (page === 'escritorio' || page === 'noticias')) {
+      return;
+    }
+
     let newHash = `#/${page}`;
     if (page === 'escritorio') {
       const tab = subTab || officeTab;
@@ -323,33 +383,41 @@ export default function Home({ onNavigateToAdmin }) {
           </button>
 
           {/* O Escritório with Dropdown Submenu */}
-          <div className="nav-dropdown-item">
+          <div className={`nav-dropdown-item ${isUnderConstruction ? 'disabled' : ''}`}>
             <button 
-              className={`nav-btn ${currentPage === 'escritorio' ? 'active' : ''}`} 
-              onClick={() => navigateToHash('escritorio')}
+              className={`nav-btn ${currentPage === 'escritorio' ? 'active' : ''} ${isUnderConstruction ? 'nav-btn-disabled' : ''}`} 
+              onClick={() => !isUnderConstruction && navigateToHash('escritorio')}
+              disabled={isUnderConstruction}
+              aria-disabled={isUnderConstruction}
+              title={isUnderConstruction ? 'Conteúdo em construção' : ''}
             >
               {t.nav.escritorio}
-              <span className="dropdown-caret">▾</span>
+              {!isUnderConstruction && <span className="dropdown-caret">▾</span>}
             </button>
-            <div className="nav-dropdown-menu">
-              <button 
-                className={`dropdown-sublink ${currentPage === 'escritorio' && officeTab === 'equipe' ? 'active' : ''}`}
-                onClick={(e) => { e.stopPropagation(); navigateToHash('escritorio', 'equipe'); }}
-              >
-                {t.escritorio.equipeTab}
-              </button>
-              <button 
-                className={`dropdown-sublink ${currentPage === 'escritorio' && officeTab === 'areas' ? 'active' : ''}`}
-                onClick={(e) => { e.stopPropagation(); navigateToHash('escritorio', 'areas'); }}
-              >
-                {t.escritorio.areasTab}
-              </button>
-            </div>
+            {!isUnderConstruction && (
+              <div className="nav-dropdown-menu">
+                <button 
+                  className={`dropdown-sublink ${currentPage === 'escritorio' && officeTab === 'equipe' ? 'active' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); navigateToHash('escritorio', 'equipe'); }}
+                >
+                  {t.escritorio.equipeTab}
+                </button>
+                <button 
+                  className={`dropdown-sublink ${currentPage === 'escritorio' && officeTab === 'areas' ? 'active' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); navigateToHash('escritorio', 'areas'); }}
+                >
+                  {t.escritorio.areasTab}
+                </button>
+              </div>
+            )}
           </div>
 
           <button 
-            className={`nav-btn ${currentPage === 'noticias' ? 'active' : ''}`} 
-            onClick={() => navigateToHash('noticias')}
+            className={`nav-btn ${currentPage === 'noticias' ? 'active' : ''} ${isUnderConstruction ? 'nav-btn-disabled' : ''}`} 
+            onClick={() => !isUnderConstruction && navigateToHash('noticias')}
+            disabled={isUnderConstruction}
+            aria-disabled={isUnderConstruction}
+            title={isUnderConstruction ? 'Conteúdo em construção' : ''}
           >
             {t.nav.noticias}
           </button>
@@ -384,32 +452,40 @@ export default function Home({ onNavigateToAdmin }) {
             {t.nav.home}
           </button>
           
-          <div className="drawer-group">
+          <div className={`drawer-group ${isUnderConstruction ? 'drawer-group-disabled' : ''}`}>
             <button 
-              className={`drawer-link ${currentPage === 'escritorio' ? 'active' : ''}`}
-              onClick={() => navigateToHash('escritorio')}
+              className={`drawer-link ${currentPage === 'escritorio' ? 'active' : ''} ${isUnderConstruction ? 'drawer-link-disabled' : ''}`}
+              onClick={() => !isUnderConstruction && navigateToHash('escritorio')}
+              disabled={isUnderConstruction}
+              aria-disabled={isUnderConstruction}
+              title={isUnderConstruction ? 'Conteúdo em construção' : ''}
             >
               {t.nav.escritorio}
             </button>
-            <div className="drawer-sublinks-container">
-              <button 
-                className={`drawer-subitem ${currentPage === 'escritorio' && officeTab === 'equipe' ? 'active' : ''}`}
-                onClick={() => navigateToHash('escritorio', 'equipe')}
-              >
-                ↳ {t.escritorio.equipeTab}
-              </button>
-              <button 
-                className={`drawer-subitem ${currentPage === 'escritorio' && officeTab === 'areas' ? 'active' : ''}`}
-                onClick={() => navigateToHash('escritorio', 'areas')}
-              >
-                ↳ {t.escritorio.areasTab}
-              </button>
-            </div>
+            {!isUnderConstruction && (
+              <div className="drawer-sublinks-container">
+                <button 
+                  className={`drawer-subitem ${currentPage === 'escritorio' && officeTab === 'equipe' ? 'active' : ''}`}
+                  onClick={() => navigateToHash('escritorio', 'equipe')}
+                >
+                  ↳ {t.escritorio.equipeTab}
+                </button>
+                <button 
+                  className={`drawer-subitem ${currentPage === 'escritorio' && officeTab === 'areas' ? 'active' : ''}`}
+                  onClick={() => navigateToHash('escritorio', 'areas')}
+                >
+                  ↳ {t.escritorio.areasTab}
+                </button>
+              </div>
+            )}
           </div>
 
           <button 
-            className={`drawer-link ${currentPage === 'noticias' ? 'active' : ''}`}
-            onClick={() => navigateToHash('noticias')}
+            className={`drawer-link ${currentPage === 'noticias' ? 'active' : ''} ${isUnderConstruction ? 'drawer-link-disabled' : ''}`}
+            onClick={() => !isUnderConstruction && navigateToHash('noticias')}
+            disabled={isUnderConstruction}
+            aria-disabled={isUnderConstruction}
+            title={isUnderConstruction ? 'Conteúdo em construção' : ''}
           >
             {t.nav.noticias}
           </button>
@@ -443,6 +519,11 @@ export default function Home({ onNavigateToAdmin }) {
         {currentPage === 'home' && (
           <section className="screen-section home-hero-view">
             <div className="brand-block">
+              {isUnderConstruction && (
+                <div className="under-construction-badge" role="status" aria-live="polite">
+                  EM CONSTRUÇÃO...
+                </div>
+              )}
               <div className="hero-logo-wrapper">
                 <img 
                   src="/image/logo ferrari-escritorio-28-11-25.jpg" 

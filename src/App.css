@@ -413,6 +413,64 @@ html, body, #root {
 /* ==========================================================================
    Hero View (Eduardo Ferrari Advocacia)
    ========================================================================== */
+.under-construction-badge {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: clamp(0.95rem, 2.2vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: 5px;
+  color: #c0392b;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  padding: 8px 26px;
+  border-radius: 6px;
+  background: rgba(192, 57, 43, 0.08);
+  border: 1.5px dashed rgba(192, 57, 43, 0.5);
+  box-shadow: 0 4px 20px rgba(192, 57, 43, 0.15);
+  user-select: none;
+  animation: constructionBlinkPulse 2s ease-in-out infinite;
+  text-align: center;
+  line-height: 1.2;
+}
+
+@keyframes constructionBlinkPulse {
+  0%, 100% {
+    transform: scale(0.94);
+    opacity: 0.4;
+    box-shadow: 0 2px 10px rgba(192, 57, 43, 0.1);
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+    box-shadow: 0 6px 26px rgba(192, 57, 43, 0.35);
+    text-shadow: 0 0 14px rgba(192, 57, 43, 0.4);
+  }
+}
+
+/* Disabled navigation elements for under-construction state */
+.nav-btn.nav-btn-disabled,
+.nav-dropdown-item.disabled > .nav-btn,
+.drawer-link.drawer-link-disabled,
+.drawer-group.drawer-group-disabled > .drawer-link {
+  opacity: 0.28 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  border-bottom-color: transparent !important;
+}
+
+.nav-dropdown-item.disabled:hover .nav-dropdown-menu,
+.nav-dropdown-item.disabled .nav-dropdown-menu {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.drawer-group.drawer-group-disabled .drawer-sublinks-container {
+  display: none !important;
+}
+
 .brand-block {
   text-align: center;
   user-select: none;
