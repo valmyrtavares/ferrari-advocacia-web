@@ -10,8 +10,10 @@ import {
   getStoredContact,
   saveStoredContact,
   resetCmsDefaults,
-  getEmbedVideoUrl
+  getEmbedVideoUrl,
+  syncFromFirebase
 } from '../data/cmsData';
+import { uploadSiteMediaFirebase, isFirebaseConfigured, CURRENT_SITE_ID } from '../services/firebase';
 
 export default function Admin({ onNavigateToSite }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -152,12 +154,27 @@ export default function Admin({ onNavigateToSite }) {
     setLawyerModalOpen(true);
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        showToast('Aviso: Imagem maior que 2MB. Recomendamos imagens menores para otimizar o carregamento.', 'warning');
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Aviso: Imagem muito pesada (maior que 5MB). Escolha uma menor.', 'warning');
+        return;
       }
+
+      if (isFirebaseConfigured) {
+        try {
+          showToast('Enviando foto para o Firebase Storage...', 'info');
+          const uploadedUrl = await uploadSiteMediaFirebase(file, `${editingLawyer.name || 'lawyer'}-${Date.now()}`);
+          setEditingLawyer(prev => ({ ...prev, image: uploadedUrl }));
+          showToast('Foto salva no Firebase Storage com sucesso!');
+          return;
+        } catch (err) {
+          console.warn('[Admin] Erro no upload Firebase Storage, usando fallback local:', err);
+          showToast('Falha no upload para nuvem, salvando localmente.', 'warning');
+        }
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setEditingLawyer(prev => ({ ...prev, image: reader.result }));
@@ -578,11 +595,38 @@ export default function Admin({ onNavigateToSite }) {
           </button>
 
           <div className="admin-sidebar-footer">
-            <div className="storage-status">
-              <span className="status-dot"></span>
-              <span>Armazenamento: LocalStorage Ativo</span>
+            <div className="storage-status" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="status-dot" style={{ background: isFirebaseConfigured ? '#10b981' : '#f59e0b' }}></span>
+                <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>
+                  {isFirebaseConfigured ? `Firebase Cloud (${CURRENT_SITE_ID})` : 'Modo Local / Cache'}
+                </span>
+              </div>
+              {isFirebaseConfigured && (
+                <button 
+                  onClick={async () => {
+                    showToast('Sincronizando com Firebase...', 'info');
+                    await syncFromFirebase();
+                    loadData();
+                    showToast('Dados sincronizados com o Firebase!');
+                  }}
+                  style={{
+                    background: 'none',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    color: '#e2e8f0',
+                    fontSize: '0.72rem',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    marginTop: '4px',
+                    textAlign: 'center'
+                  }}
+                >
+                  🔄 Sincronizar Nuvem
+                </button>
+              )}
             </div>
-            <div className="admin-version">CMS v1.4 • Eduardo Ferrari</div>
+            <div className="admin-version">CMS v1.5 Multi-tenant • Firebase Always-on</div>
           </div>
         </aside>
 

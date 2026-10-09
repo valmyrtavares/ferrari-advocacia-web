@@ -228,6 +228,48 @@ const STORAGE_KEY_AREAS = 'ef_cms_areas_v1';
 const STORAGE_KEY_ARTICLES = 'ef_cms_articles_v1';
 const STORAGE_KEY_CONTACT = 'ef_cms_contact_v1';
 
+import { 
+  saveSiteContentToFirebase, 
+  fetchSiteContentFromFirebase, 
+  isFirebaseConfigured,
+  CURRENT_SITE_ID
+} from '../services/firebase';
+
+// Sync data from Firebase Cloud on initialization
+let isSyncingWithCloud = false;
+
+export async function syncFromFirebase() {
+  if (!isFirebaseConfigured || isSyncingWithCloud) return;
+  isSyncingWithCloud = true;
+  try {
+    const cloudData = await fetchSiteContentFromFirebase(CURRENT_SITE_ID);
+    if (cloudData) {
+      if (cloudData.lawyers) {
+        localStorage.setItem(STORAGE_KEY_LAWYERS, JSON.stringify(cloudData.lawyers));
+      }
+      if (cloudData.areas) {
+        localStorage.setItem(STORAGE_KEY_AREAS, JSON.stringify(cloudData.areas));
+      }
+      if (cloudData.articles) {
+        localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(cloudData.articles));
+      }
+      if (cloudData.contact) {
+        localStorage.setItem(STORAGE_KEY_CONTACT, JSON.stringify(cloudData.contact));
+      }
+      window.dispatchEvent(new Event('cms_data_updated'));
+    }
+  } catch (err) {
+    console.warn('[CMS] Erro ao sincronizar dados remotos do Firebase:', err);
+  } finally {
+    isSyncingWithCloud = false;
+  }
+}
+
+// Auto-run initial sync in browser
+if (typeof window !== 'undefined') {
+  syncFromFirebase();
+}
+
 export function getStoredLawyers() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_LAWYERS);
@@ -246,8 +288,11 @@ export function saveStoredLawyers(lawyers) {
   try {
     localStorage.setItem(STORAGE_KEY_LAWYERS, JSON.stringify(lawyers));
     window.dispatchEvent(new Event('cms_data_updated'));
+    if (isFirebaseConfigured) {
+      saveSiteContentToFirebase('lawyers', lawyers);
+    }
   } catch (e) {
-    console.error('Error saving lawyers to localStorage:', e);
+    console.error('Error saving lawyers:', e);
   }
 }
 
@@ -269,8 +314,11 @@ export function saveStoredAreas(areas) {
   try {
     localStorage.setItem(STORAGE_KEY_AREAS, JSON.stringify(areas));
     window.dispatchEvent(new Event('cms_data_updated'));
+    if (isFirebaseConfigured) {
+      saveSiteContentToFirebase('areas', areas);
+    }
   } catch (e) {
-    console.error('Error saving areas to localStorage:', e);
+    console.error('Error saving areas:', e);
   }
 }
 
@@ -292,8 +340,11 @@ export function saveStoredArticles(articles) {
   try {
     localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(articles));
     window.dispatchEvent(new Event('cms_data_updated'));
+    if (isFirebaseConfigured) {
+      saveSiteContentToFirebase('articles', articles);
+    }
   } catch (e) {
-    console.error('Error saving articles to localStorage:', e);
+    console.error('Error saving articles:', e);
   }
 }
 
@@ -315,8 +366,11 @@ export function saveStoredContact(contact) {
   try {
     localStorage.setItem(STORAGE_KEY_CONTACT, JSON.stringify(contact));
     window.dispatchEvent(new Event('cms_data_updated'));
+    if (isFirebaseConfigured) {
+      saveSiteContentToFirebase('contact', contact);
+    }
   } catch (e) {
-    console.error('Error saving contact to localStorage:', e);
+    console.error('Error saving contact:', e);
   }
 }
 
@@ -326,6 +380,12 @@ export function resetCmsDefaults() {
   localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(INITIAL_ARTICLES));
   localStorage.setItem(STORAGE_KEY_CONTACT, JSON.stringify(INITIAL_CONTACT));
   window.dispatchEvent(new Event('cms_data_updated'));
+  if (isFirebaseConfigured) {
+    saveSiteContentToFirebase('lawyers', INITIAL_LAWYERS);
+    saveSiteContentToFirebase('areas', INITIAL_AREAS);
+    saveSiteContentToFirebase('articles', INITIAL_ARTICLES);
+    saveSiteContentToFirebase('contact', INITIAL_CONTACT);
+  }
 }
 
 export function getEmbedVideoUrl(url) {
