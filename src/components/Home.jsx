@@ -54,13 +54,17 @@ export default function Home({ onNavigateToAdmin }) {
   const applyRouteFromHash = () => {
     const unlocked = checkIsUnlocked();
     const hash = window.location.hash.replace(/^#\/?/, '').trim();
-    if (!hash || hash === 'home') {
+    const rawPath = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+    const pathSection = rawPath.replace('construindo', '').replace(/^\/|\/$/g, '');
+    const effectiveSection = hash || pathSection;
+
+    if (!effectiveSection || effectiveSection === 'home') {
       setCurrentPage('home');
       setSelectedArticleId(null);
       return;
     }
 
-    const parts = hash.split('/');
+    const parts = effectiveSection.split('/');
     const mainSection = parts[0];
 
     if (mainSection === 'admin') {
@@ -97,7 +101,7 @@ export default function Home({ onNavigateToAdmin }) {
       } else {
         setSelectedArticleId(null);
       }
-    } else if (mainSection === 'contato') {
+    } else if (mainSection === 'contato' || mainSection === 'contatos') {
       setCurrentPage('contato');
       setSelectedArticleId(null);
     }
@@ -327,6 +331,8 @@ export default function Home({ onNavigateToAdmin }) {
   const currentSelectedArea = t.escritorio.areas.find(s => s.id === activeServiceId) || t.escritorio.areas[0] || null;
   const currentReadingArticle = selectedArticleId ? t.noticias.articles.find(a => a.id === selectedArticleId) : null;
 
+  const hideHeaderLogo = currentPage === 'home' || currentPage === 'contato';
+
   return (
     <div className="home-container">
       {/* Background Overlay */}
@@ -335,11 +341,13 @@ export default function Home({ onNavigateToAdmin }) {
       {/* Top Header Section (Floating transparent header) */}
       <header className="home-header">
         {/* Left Brand Identity: Full logo lockup (Logo + Subtitle underneath) */}
-        <div className="header-left-nav">
+        <div className={`header-left-nav ${hideHeaderLogo ? 'header-logo-hidden' : ''}`}>
           <button 
             className="header-brand-btn" 
             onClick={() => navigateToHash('home')}
             aria-label="Eduardo Ferrari Advocacia Criminal - Início"
+            tabIndex={hideHeaderLogo ? -1 : 0}
+            aria-hidden={hideHeaderLogo ? 'true' : undefined}
           >
             <div className="header-brand-wrapper">
               <img 

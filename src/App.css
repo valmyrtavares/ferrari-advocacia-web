@@ -44,6 +44,13 @@ html, body, #root {
 .header-left-nav {
   display: flex;
   align-items: center;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.header-left-nav.header-logo-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .header-brand-btn {
